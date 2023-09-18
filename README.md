@@ -4,36 +4,36 @@
  * @LastEditors: victor victor@example.com
  * @LastEditTime: 2023-09-18 10:55:11
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\README.md
- * @Description: ÕâÊÇÄ¬ÈÏÉèÖÃ,ÇëÉèÖÃ`customMade`, ´ò¿ªkoroFileHeader²é¿´ÅäÖÃ ½øÐÐÉèÖÃ: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @Description: è¿™æ˜¯é»˜è®¤è®¾ç½®,è¯·è®¾ç½®`customMade`, æ‰“å¼€koroFileHeaderæŸ¥çœ‹é…ç½® è¿›è¡Œè®¾ç½®: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
-Ô¶³Ì¶àÈËÁª»úÎå×ÓÆå
+è¿œç¨‹å¤šäººè”æœºäº”å­æ£‹
 ===========================
-###########°æÈ¨ÉùÃ÷
+###########ç‰ˆæƒå£°æ˜Ž
 
-    Copyright ? 2023 victor.long£¬All rights reserved.
-    Ô¶³Ì¶àÈËÁª»úÎå×ÓÆå
+    Copyright Â© 2023 victor.longï¼ŒAll rights reserved.
+    è¿œç¨‹å¤šäººè”æœºäº”å­æ£‹
 
-###########Ó²¼þÖ§³Ö
+###########ç¡¬ä»¶æ”¯æŒ
 
-    ÄÚºË°æ±¾ºÅ£º
+    å†…æ ¸ç‰ˆæœ¬å·ï¼š
         3.4.39-gec 
-    Ó²¼þ¼Ü¹¹£º
+    ç¡¬ä»¶æž¶æž„ï¼š
         armv7l 
-    ²Ù×÷ÏµÍ³£º
+    æ“ä½œç³»ç»Ÿï¼š
         GNU/Linux 
-    ÏÔÊ¾Óë´¥Ãþ£º
-        7Ó¢´çLCDÏÔÊ¾/´¥ÃþÆÁ
+    æ˜¾ç¤ºä¸Žè§¦æ‘¸ï¼š
+        7è‹±å¯¸LCDæ˜¾ç¤º/è§¦æ‘¸å±
     
 
-###########Èí¼þÖ§³Ö
+###########è½¯ä»¶æ”¯æŒ
 
-    ´úÂë±àÐ´£º
+    ä»£ç ç¼–å†™ï¼š
         vs code
-    ±àÒëÆ÷£º
+    ç¼–è¯‘å™¨ï¼š
         arm-linux-gcc 5.4.0
-    ±àÒëÆ½Ì¨£º
+    ç¼–è¯‘å¹³å°ï¼š
         x86_64 GNU/Linux 5.4.0-155-generic
-    ±àÒëÈí¼þÔËÐÐÆ½Ì¨£º
+    ç¼–è¯‘è½¯ä»¶è¿è¡Œå¹³å°ï¼š
         Ubuntu 20.04.6 LTS
 
-###########²¿Êð²½Öè
+###########éƒ¨ç½²æ­¥éª¤
