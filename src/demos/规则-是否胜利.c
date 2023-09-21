@@ -1,20 +1,24 @@
 
 #include<stdio.h>
 #define N 15 //棋盘规模
-// x,y：落子坐标（1-15,） gomoku棋局地址 flagWin胜方('0'/'*')
+//'*'表示黑子，'0'表示白子；
+// x,y：落子坐标x：1-15，y:1-15 gomoku棋局地址 flagWin胜方('0'/'*')
 int checkWin(int x,int y,char gomoku[N][N],char flagWin);//检查棋子x，y落下后是否胜利
 int main(){
     char gomoku[N][N];
+	//测试：五个黑子，5,1为最后落子位置
     for(int i=1;i<5;i++){//1,1 2,1 3,1 4,1   5,1
         gomoku[i][1]='*';
     }
+
     if(checkWin(5,1,gomoku,'*'))
         printf("5,1 win1");
     printf("\n");
+
     gomoku[3][1]='0';
     if(checkWin(5,1,gomoku,'*'))
         printf("5,1 win2");
-
+	printf("\n");
 
     for(int i=1;i<5;i++){
         gomoku[i][6-i]='*';//1,5 2,4 3,3 4,2   5,1
@@ -38,7 +42,7 @@ int main(){
     return 0;
 }
 int checkWin(int x,int y,char gomoku[N][N],char flagWin){
-	int i,j,cou1=0,cou2=0;
+	int i,j,cou1=0;
 	for(i=y+1;i<N;i++)//'*'落子位置正下方
 		if(gomoku[x][i]==flagWin)
 			cou1++;
