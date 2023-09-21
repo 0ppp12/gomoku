@@ -26,7 +26,7 @@ int main()
     // ???¡Â????????
     server_address.sin_family = AF_INET;
     // server_address.sin_addr.s_addr = inet_addr("192.168.13.64");
-    if (inet_pton(AF_INET, "192.168.13.68", &(server_address.sin_addr)) <= 0)
+    if (inet_pton(AF_INET, "192.168.13.64", &(server_address.sin_addr)) <= 0)
     {
         std::cerr << "Invalid address/ Address not supported" << std::endl;
         return 1;

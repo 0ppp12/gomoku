@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-21 16:18:19
+ * @LastEditTime: 2023-09-21 19:50:35
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -128,15 +128,15 @@ int main(void)
                     continue;
                 }
                 //数据处理
-                if(way_choose(recvbuffer,info_buffer)==2)
+                int f=way_choose(recvbuffer,info_buffer);
+                if(f==2)
                 {
                     //再次等待登录信息
                     continue;
                 }
-                else if(way_choose(recvbuffer,info_buffer)==1)
+                else if(f==1)
                 {
                     //登录成功
-                    printf("211\n");
                     game_flag=1;
                 }
                 if(game_flag==1)
@@ -156,8 +156,10 @@ int main(void)
 //登录与注册选择
 int way_choose(char *recvbuffer,std::string *buff)
 {
+    char buffer[128]={0};
+    strcpy(buffer,recvbuffer);
     //分离数组内容，验证是否合法加入
-    char *way = strtok(recvbuffer, ",");
+    char *way = strtok(buffer, ",");
     char *message = strtok(NULL,"\0");
     cout<<way<<endl;
     cout<<message<<endl;
@@ -194,29 +196,26 @@ int way_choose(char *recvbuffer,std::string *buff)
 
 void Get_NameAndPassword(char *recvbuffer)
 {
-    
-    std::string buffer(recvbuffer);
-    printf("11111\n");
-     // 查找 account 和 password 的位置
-    size_t accountPos = buffer.find("account:");
-    size_t passwordPos = buffer.find("password:");
-
-    if (accountPos != std::string::npos && passwordPos != std::string::npos) {
-        // 提取 account 的值
-        size_t accountStart = accountPos + 8; // 跳过 "account:" 的长度
-        size_t accountEnd = buffer.find("|", accountStart); // 查找 "|" 的位置
-        std::string account = buffer.substr(accountStart, accountEnd - accountStart);
-
-        // 提取 password 的值
-        size_t passwordStart = passwordPos + 9; // 跳过 "password:" 的长度
-        std::string password = buffer.substr(passwordStart);
-
-        std::cout << "Account: " << account << std::endl;
-        std::cout << "Password: " << password << std::endl;
-    } else {
-        std::cout << "No match found." << std::endl;
+    char delimiters[] = " ,|:"; // 分隔符可以是空格、逗号、问号和感叹号
+    char* token = std::strtok(recvbuffer, delimiters);
+    char name[10];
+    char password[10];
+    int a=0;
+    while (token != nullptr) {
+        if(a==3)
+        {
+            strcpy(name,token);
+        }
+        if(a==5)
+        {
+            strcpy(password,token);
+            break;
+        }
+        token = std::strtok(nullptr, delimiters);
+        a++;
     }
-
+    cout<<name<<endl;
+    cout<<password<<endl;
 }
 
 bool File_read(string filename,string *buff)
