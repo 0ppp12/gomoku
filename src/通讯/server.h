@@ -28,7 +28,7 @@ typedef struct
 
 typedef struct 
 {
-    Player[2];
+    Player people[2];
     int sign;
     int num;
 }Room;
@@ -38,3 +38,4 @@ bool File_read(std::string filename,std::string *buff);
 bool File_write(std::string filename,std::string info);
 bool Send_info(int client_socket,int a);
 int way_choose(char *recvbuffer,std::string *buff);
+void Get_NameAndPassword(char *recvbuffer);

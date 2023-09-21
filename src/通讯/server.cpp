@@ -136,12 +136,15 @@ int main(void)
                 else if(way_choose(recvbuffer,info_buffer)==1)
                 {
                     //登录成功
+                    printf("211\n");
                     game_flag=1;
                 }
                 if(game_flag==1)
                 {
                     //添加套接字
                     vector<Room> rooms;
+                    Room m;
+                    Get_NameAndPassword(recvbuffer);
                     
                     game_flag = 0;
                 }
@@ -181,12 +184,39 @@ int way_choose(char *recvbuffer,std::string *buff)
             if(!File_read("./info.txt",buff))
             {
                 cout<<"读取文件失败"<<endl;
-                return false;
+                return 0;
             }
             return 2;
         }
     }
-    return false;
+    return 0;
+}
+
+void Get_NameAndPassword(char *recvbuffer)
+{
+    
+    std::string buffer(recvbuffer);
+    printf("11111\n");
+     // 查找 account 和 password 的位置
+    size_t accountPos = buffer.find("account:");
+    size_t passwordPos = buffer.find("password:");
+
+    if (accountPos != std::string::npos && passwordPos != std::string::npos) {
+        // 提取 account 的值
+        size_t accountStart = accountPos + 8; // 跳过 "account:" 的长度
+        size_t accountEnd = buffer.find("|", accountStart); // 查找 "|" 的位置
+        std::string account = buffer.substr(accountStart, accountEnd - accountStart);
+
+        // 提取 password 的值
+        size_t passwordStart = passwordPos + 9; // 跳过 "password:" 的长度
+        std::string password = buffer.substr(passwordStart);
+
+        std::cout << "Account: " << account << std::endl;
+        std::cout << "Password: " << password << std::endl;
+    } else {
+        std::cout << "No match found." << std::endl;
+    }
+
 }
 
 bool File_read(string filename,string *buff)
