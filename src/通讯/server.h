@@ -29,5 +29,7 @@ typedef struct
     char play_time[50];
 } Player;
 
+bool File_read(std::string filename,std::string *buff);
+bool File_write(std::string filename,std::string info);
 bool Send_info(int client_socket,int a);
 bool way_choose(char *recvbuffer,std::string *buff);

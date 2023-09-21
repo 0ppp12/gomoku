@@ -2,6 +2,14 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
+ * @LastEditTime: 2023-09-21 14:11:22
+ * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+/*
+ * @Author: victor victor@example.com
+ * @Date: 2023-09-19 18:53:21
+ * @LastEditors: victor victor@example.com
  * @LastEditTime: 2023-09-21 14:04:58
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\项目代码\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEn
@@ -10,47 +18,6 @@
 #include "server.h"
 using namespace std;
 std::mutex m;
-
-bool File_read(string filename,string *buff)
-{
-    m.lock();
-     //1.创建文件输入流--读文件
-    ifstream in(filename);
-    if(!in.is_open())
-    {
-        cout<<"打开失败"<<endl;
-        return false;
-    }
-
-    //2.读文件
-    char buffer[128];
-    int a=0;
-    while(in>>buffer){  
-        buff[a]=buffer;
-        a++;  
-    }
-    
-    in.close();
-    m.unlock();
-    return true;
-}
-
-bool File_write(string filename,string info)
-{
-    m.lock();
-    //写文件
-    ofstream out(filename,std::ios::app);
-    if(!out.is_open())
-    {
-        cout<<"写打开失败"<<endl;
-        return false;
-    }
-    out<<info;
-    out<<'\n';
-    out.close();
-    m.unlock();
-    return true;
-}
 
 int main(void)
 {
@@ -200,4 +167,45 @@ bool way_choose(char *recvbuffer,std::string *buff)
         }
     }
     return false;
+}
+
+bool File_read(string filename,string *buff)
+{
+    m.lock();
+     //1.创建文件输入流--读文件
+    ifstream in(filename);
+    if(!in.is_open())
+    {
+        cout<<"打开失败"<<endl;
+        return false;
+    }
+
+    //2.读文件
+    char buffer[128];
+    int a=0;
+    while(in>>buffer){  
+        buff[a]=buffer;
+        a++;  
+    }
+    
+    in.close();
+    m.unlock();
+    return true;
+}
+
+bool File_write(string filename,string info)
+{
+    m.lock();
+    //写文件
+    ofstream out(filename,std::ios::app);
+    if(!out.is_open())
+    {
+        cout<<"写打开失败"<<endl;
+        return false;
+    }
+    out<<info;
+    out<<'\n';
+    out.close();
+    m.unlock();
+    return true;
 }
