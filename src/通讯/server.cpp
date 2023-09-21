@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-21 14:11:22
+ * @LastEditTime: 2023-09-21 16:18:19
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -18,6 +18,7 @@
 #include "server.h"
 using namespace std;
 std::mutex m;
+int game_flag=0;
 
 int main(void)
 {
@@ -108,7 +109,8 @@ int main(void)
                     perror("add error");
                     return -1;
                 }
-            }else//客户端来数据
+            }
+            else//客户端来数据
             {
                 //读取客户端数据
                 char recvbuffer[128]={0};
@@ -126,13 +128,30 @@ int main(void)
                     continue;
                 }
                 //数据处理
-                way_choose(recvbuffer,info_buffer);
+                if(way_choose(recvbuffer,info_buffer)==2)
+                {
+                    //再次等待登录信息
+                    continue;
+                }
+                else if(way_choose(recvbuffer,info_buffer)==1)
+                {
+                    //登录成功
+                    game_flag=1;
+                }
+                if(game_flag==1)
+                {
+                    //添加套接字
+                    vector<Room> rooms;
+                    
+                    game_flag = 0;
+                }
             }
         }
     }
 }
+
 //登录与注册选择
-bool way_choose(char *recvbuffer,std::string *buff)
+int way_choose(char *recvbuffer,std::string *buff)
 {
     //分离数组内容，验证是否合法加入
     char *way = strtok(recvbuffer, ",");
@@ -148,22 +167,23 @@ bool way_choose(char *recvbuffer,std::string *buff)
             if (strcmp(buff[i].c_str(), message) == 0)
             {
                 cout << "登录成功" << endl;
-                return true;
+                return 1;
             }
             i++;
         }
         cout << "登录失败" << endl;
     }
     //注册
-    if(strcmp(way,"way:register")==0)
+    else if(strcmp(way,"way:register")==0)
     {
         if(File_write("./info.txt",message))
         {
             if(!File_read("./info.txt",buff))
             {
                 cout<<"读取文件失败"<<endl;
+                return false;
             }
-            return true;
+            return 2;
         }
     }
     return false;

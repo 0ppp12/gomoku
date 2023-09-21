@@ -16,20 +16,25 @@
 #include <sys/epoll.h>
 
 #define BUFFER_SIZE 1024
-typedef struct 
-{
-    int client_socket; //套接字描述符
-    char client_name[50];//客户名字
-} Client;
 
 typedef struct 
 {
     char name[50];
-    int is_correct;
-    char play_time[50];
+    char password[50];
+    int sockfd;
+    int play_score;
+    char message[BUFFER_SIZE];
 } Player;
+
+typedef struct 
+{
+    Player[2];
+    int sign;
+    int num;
+}Room;
+
 
 bool File_read(std::string filename,std::string *buff);
 bool File_write(std::string filename,std::string info);
 bool Send_info(int client_socket,int a);
-bool way_choose(char *recvbuffer,std::string *buff);
+int way_choose(char *recvbuffer,std::string *buff);
