@@ -2,17 +2,17 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-21 19:50:35
- * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\Í¨Ñ¶\server.cpp
- * @Description: ÕâÊÇÄ¬ÈÏÉèÖÃ,ÇëÉèÖÃ`customMade`, ´ò¿ªkoroFileHeader²é¿´ÅäÖÃ ½øĞĞÉèÖÃ: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @LastEditTime: 2023-09-22 15:24:31
+ * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\é€šè®¯\server.cpp
+ * @Description: è¿™æ˜¯é»˜è®¤è®¾ç½®,è¯·è®¾ç½®`customMade`, æ‰“å¼€koroFileHeaderæŸ¥çœ‹é…ç½® è¿›è¡Œè®¾ç½®: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 /*
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
  * @LastEditTime: 2023-09-21 14:04:58
- * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\ÏîÄ¿´úÂë\server.cpp
- * @Description: ÕâÊÇÄ¬ÈÏÉèÖÃ,ÇëÉèÖÃ`customMade`, ´ò¿ªkoroFileHeader²é¿´ÅäÖÃ ½øĞĞÉèÖÃ: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEn
+ * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\é¡¹ç›®ä»£ç \server.cpp
+ * @Description: è¿™æ˜¯é»˜è®¤è®¾ç½®,è¯·è®¾ç½®`customMade`, æ‰“å¼€koroFileHeaderæŸ¥çœ‹é…ç½® è¿›è¡Œè®¾ç½®: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEn
  */
 #include <iostream>
 #include "server.h"
@@ -22,19 +22,19 @@ int game_flag=0;
 
 int main(void)
 {
-    string info_buffer[100];                                                                                                                               
-    if(!File_read("./info.txt",info_buffer))
+    Player player_buffer[50];                                                                                                                             
+    if(!File_read("./info.txt",player_buffer))
     {
-        cout<<"¶ÁÈ¡ÎÄ¼şÊ§°Ü"<<endl;
+        cout<<"è¯»å–æ–‡ä»¶å¤±è´¥"<<endl;
     }
-    //1.´´½¨Ì×½Ó×Ö
+    //1.åˆ›å»ºå¥—æ¥å­—
     int sockfd =  socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0)
     {
         perror("socket");
         return -1;
     }
-    //2.°ó¶¨
+    //2.ç»‘å®š
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(11451);
@@ -46,7 +46,7 @@ int main(void)
         return -1;
     }
 
-    //3.¼àÌı
+    //3.ç›‘å¬
     ret = listen(sockfd, 5);
     if(ret < 0)
     {
@@ -54,7 +54,7 @@ int main(void)
         return -1;
     }
 
-    //´´½¨epollÊµÀı
+    //åˆ›å»ºepollå®ä¾‹
     int epfd = epoll_create(10);
     if(epfd <0)
     {
@@ -62,7 +62,7 @@ int main(void)
         return -1;
     }
     
-    //°Ñ¼àÌıÌ×½Ó×ÖÃèÊö·ûÌí¼Óµ½epoll¼àÌı¶ÓÁĞ
+    //æŠŠç›‘å¬å¥—æ¥å­—æè¿°ç¬¦æ·»åŠ åˆ°epollç›‘å¬é˜Ÿåˆ—
     struct epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = sockfd;
@@ -73,9 +73,10 @@ int main(void)
         return -1;
     }
 
+    
     while(1)
     {
-        //µÈ´ıÊÂ¼ş·¢Éú
+        //ç­‰å¾…äº‹ä»¶å‘ç”Ÿ
         struct epoll_event evt[10];
         int size = epoll_wait(epfd, evt, 10, -1);
         if(size < 0)
@@ -86,10 +87,10 @@ int main(void)
 
         for(int i=0; i<size; i++)
         {
-            //ÅĞ¶ÏÊÇ·ñÊÇ¼àÌıÌ×½Ó×Ösockfd
+            //åˆ¤æ–­æ˜¯å¦æ˜¯ç›‘å¬å¥—æ¥å­—sockfd
             if(evt[i].data.fd == sockfd)
             {
-                //4.½ÓÊÜÁ¬½Ó£¨Ä¬ÈÏÊÇ×èÈû£©
+                //4.æ¥å—è¿æ¥ï¼ˆé»˜è®¤æ˜¯é˜»å¡ï¼‰
                 struct sockaddr_in clientaddr;
                 socklen_t len = sizeof(clientaddr);
                 int clientfd = accept(sockfd, (struct sockaddr *)(&clientaddr), &len);
@@ -98,8 +99,8 @@ int main(void)
                     perror("accept");
                     return -1;
                 }
-                printf("¿Í»§¶ËIP:%s\n", inet_ntoa(clientaddr.sin_addr));
-                //°ÑÓë¿Í»§¶ËÍ¨ĞÅµÄÌ×½Ó×ÖÃèÊö·ûÒ²Ìí¼Óµ½¼àÌı¶ÓÁĞÖĞ
+                printf("å®¢æˆ·ç«¯IP:%s\n", inet_ntoa(clientaddr.sin_addr));
+                //æŠŠä¸å®¢æˆ·ç«¯é€šä¿¡çš„å¥—æ¥å­—æè¿°ç¬¦ä¹Ÿæ·»åŠ åˆ°ç›‘å¬é˜Ÿåˆ—ä¸­
                 struct epoll_event event;
                 event.events = EPOLLIN;
                 event.data.fd = clientfd;
@@ -110,14 +111,14 @@ int main(void)
                     return -1;
                 }
             }
-            else//¿Í»§¶ËÀ´Êı¾İ
+            else//å®¢æˆ·ç«¯æ¥æ•°æ®
             {
-                //¶ÁÈ¡¿Í»§¶ËÊı¾İ
+                //è¯»å–å®¢æˆ·ç«¯æ•°æ®
                 char recvbuffer[128]={0};
                 int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
                 if(rsize <= 0)
                 {
-                    //¿Í»§¶ËµôÏß
+                    //å®¢æˆ·ç«¯æ‰çº¿
                     int eret = epoll_ctl(epfd, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
                     if(eret<0)
                     {
@@ -127,76 +128,113 @@ int main(void)
                     close(evt[i].data.fd);
                     continue;
                 }
-                //Êı¾İ´¦Àí
-                int f=way_choose(recvbuffer,info_buffer);
-                if(f==2)
+                //æ•°æ®å¤„ç†
+                Player f=way_choose(recvbuffer,player_buffer);
+                if(f.name[0]!='\0')
                 {
-                    //ÔÙ´ÎµÈ´ıµÇÂ¼ĞÅÏ¢
-                    continue;
-                }
-                else if(f==1)
-                {
-                    //µÇÂ¼³É¹¦
+                    //ç™»å½•æˆåŠŸ
                     game_flag=1;
+                    cout<<game_flag<<endl;
                 }
-                if(game_flag==1)
-                {
-                    //Ìí¼ÓÌ×½Ó×Ö
-                    vector<Room> rooms;
-                    Room m;
-                    Get_NameAndPassword(recvbuffer);
+                // if(game_flag==1)
+                // {
+                //     //æ·»åŠ å¥—æ¥å­—
+                //     vector<Room> rooms;
+                //     Room m;
+                //     Get_NameAndPassword(recvbuffer);
                     
-                    game_flag = 0;
-                }
+                //     game_flag = 0;
+                // }
             }
         }
     }
 }
 
-//µÇÂ¼Óë×¢²áÑ¡Ôñ
-int way_choose(char *recvbuffer,std::string *buff)
+//ç™»å½•ä¸æ³¨å†Œé€‰æ‹©
+Player  way_choose(char *recvbuffer,Player *buff)
 {
+    Player emptyPlayer;
+    memset(emptyPlayer.name,0,sizeof(emptyPlayer));
+
     char buffer[128]={0};
     strcpy(buffer,recvbuffer);
-    //·ÖÀëÊı×éÄÚÈİ£¬ÑéÖ¤ÊÇ·ñºÏ·¨¼ÓÈë
+    //åˆ†ç¦»æ•°ç»„å†…å®¹ï¼ŒéªŒè¯æ˜¯å¦åˆæ³•åŠ å…¥
     char *way = strtok(buffer, ",");
     char *message = strtok(NULL,"\0");
-    cout<<way<<endl;
-    cout<<message<<endl;
+    message[strlen(message)-1]='\0';
+
+    char name[10];
+    char password[10]; 
     int i=0;
-    //µÇÂ¼
+    
+
+
+    char delimiters[] = " ,|:"; // åˆ†éš”ç¬¦å¯ä»¥æ˜¯ç©ºæ ¼ã€é€—å·ã€é—®å·å’Œæ„Ÿå¹å·
+    char* token = std::strtok(message, delimiters);
+    int b=0;
+    while (token != nullptr) {
+        if(b==1)
+        {
+            strcpy(name,token);
+        }
+        if(b==3)
+        {
+            strcpy(password,token);
+            break;
+        }
+        token = std::strtok(nullptr, delimiters);
+        b++;
+    }
+    //ç™»å½•
     if (strcmp(way, "way:login") == 0)
     {
-        while(buff[i].length()!=0)
-        {
-            if (strcmp(buff[i].c_str(), message) == 0)
+        while(strlen(buff[i].name)!=0)
+        {    
+            if (strcmp(buff[i].name, name) == 0)
             {
-                cout << "µÇÂ¼³É¹¦" << endl;
-                return 1;
+                if(strcmp(buff[i].password, password) == 0)
+                {
+                    cout <<"2"<<endl;
+                    cout << "ç™»å½•æˆåŠŸ" << endl;
+                    return buff[i];
+                }
             }
             i++;
         }
-        cout << "µÇÂ¼Ê§°Ü" << endl;
+        cout << "ç™»å½•å¤±è´¥" << endl;
     }
-    //×¢²á
+    // //æ³¨å†Œ
     else if(strcmp(way,"way:register")==0)
     {
+        strcat(message,":");
+        strcat(message,name);
+        strcat(message,"|password:");
+        strcat(message,password);
+        cout<<message<<endl;
+        while(strlen(buff[i].name)!=0)
+        {    
+            if (strcmp(buff[i].name, name) == 0)
+            {
+                cout<<"è´¦æˆ·å·²å­˜åœ¨"<<endl;
+                return emptyPlayer;
+            }
+            i++;
+        }
         if(File_write("./info.txt",message))
         {
             if(!File_read("./info.txt",buff))
             {
-                cout<<"¶ÁÈ¡ÎÄ¼şÊ§°Ü"<<endl;
-                return 0;
+                cout<<"è¯»å–æ–‡ä»¶å¤±è´¥"<<endl;
             }
-            return 2;
         }
+        cout<<"æ³¨å†ŒæˆåŠŸ"<<endl;
     }
-    return 0;
+    return emptyPlayer;
 }
 
 void Get_NameAndPassword(char *recvbuffer)
 {
-    char delimiters[] = " ,|:"; // ·Ö¸ô·û¿ÉÒÔÊÇ¿Õ¸ñ¡¢¶ººÅ¡¢ÎÊºÅºÍ¸ĞÌ¾ºÅ
+    char delimiters[] = " ,|:"; // åˆ†éš”ç¬¦å¯ä»¥æ˜¯ç©ºæ ¼ã€é€—å·ã€é—®å·å’Œæ„Ÿå¹å·
     char* token = std::strtok(recvbuffer, delimiters);
     char name[10];
     char password[10];
@@ -218,25 +256,42 @@ void Get_NameAndPassword(char *recvbuffer)
     cout<<password<<endl;
 }
 
-bool File_read(string filename,string *buff)
+bool File_read(string filename,Player *buff)
 {
     m.lock();
-     //1.´´½¨ÎÄ¼şÊäÈëÁ÷--¶ÁÎÄ¼ş
+     //1.åˆ›å»ºæ–‡ä»¶è¾“å…¥æµ--è¯»æ–‡ä»¶
     ifstream in(filename);
     if(!in.is_open())
     {
-        cout<<"´ò¿ªÊ§°Ü"<<endl;
+        cout<<"æ‰“å¼€å¤±è´¥"<<endl;
         return false;
     }
 
-    //2.¶ÁÎÄ¼ş
+    //2.è¯»æ–‡ä»¶
     char buffer[128];
     int a=0;
-    while(in>>buffer){  
-        buff[a]=buffer;
+    while(in>>buffer){ 
+        char delimiters[] = " ,|:"; // åˆ†éš”ç¬¦å¯ä»¥æ˜¯ç©ºæ ¼ã€é€—å·ã€é—®å·å’Œæ„Ÿå¹å·
+        char* token = std::strtok(buffer, delimiters);
+        int b=0;
+        while (token != nullptr) {
+            if(b==1)
+            {
+                strcpy(buff[a].name,token);
+            }
+            if(b==3)
+            {
+                strcpy(buff[a].password,token);
+            }
+            if(b==5)
+            {
+                strcpy(buff[a].play_score,token);
+            }
+            token = std::strtok(nullptr, delimiters);
+            b++;
+        }
         a++;  
     }
-    
     in.close();
     m.unlock();
     return true;
@@ -245,16 +300,18 @@ bool File_read(string filename,string *buff)
 bool File_write(string filename,string info)
 {
     m.lock();
-    //Ğ´ÎÄ¼ş
+    //å†™æ–‡ä»¶
     ofstream out(filename,std::ios::app);
     if(!out.is_open())
     {
-        cout<<"Ğ´´ò¿ªÊ§°Ü"<<endl;
+        cout<<"å†™æ‰“å¼€å¤±è´¥"<<endl;
         return false;
     }
-    out<<info;
+    out<<info+"|score:0";
     out<<'\n';
     out.close();
     m.unlock();
     return true;
 }
+//way:login,account:é¾™ä¿Šè±ª|password:111111
+//way:register,account:é¾™ä¿Šè±ª|password:123456

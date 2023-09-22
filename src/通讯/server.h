@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>  // 包含网络相关函数的头文件
+#include <arpa/inet.h>  // 鍖呭惈缃戠粶鐩稿叧鍑芥暟鐨勫ご鏂囦欢
 #include <sys/epoll.h>
 
 #define BUFFER_SIZE 1024
@@ -22,7 +22,7 @@ typedef struct
     char name[50];
     char password[50];
     int sockfd;
-    int play_score;
+    char play_score[50];
     char message[BUFFER_SIZE];
 } Player;
 
@@ -34,8 +34,7 @@ typedef struct
 }Room;
 
 
-bool File_read(std::string filename,std::string *buff);
+bool File_read(std::string filename,Player *buff);
 bool File_write(std::string filename,std::string info);
-bool Send_info(int client_socket,int a);
-int way_choose(char *recvbuffer,std::string *buff);
+Player  way_choose(char *recvbuffer,Player *buff);
 void Get_NameAndPassword(char *recvbuffer);
