@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-22 16:17:01
+ * @LastEditTime: 2023-09-22 17:12:12
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -42,7 +42,7 @@ int main(void)
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(11111);
+    addr.sin_port = htons(11451);
     addr.sin_addr.s_addr = INADDR_ANY;
     int ret =  bind(sockfd, (struct sockaddr*)(&addr),sizeof(addr));
     if(ret < 0)
@@ -85,7 +85,6 @@ int main(void)
         perror("init_pool failed!!!\n");
         return -1;
     }
-    
     while(1)
     {
         //等待事件发生
@@ -142,12 +141,14 @@ int main(void)
                 }
                 //数据处理
                 Player f=way_choose(recvbuffer,player_buffer);
+                cout<<"1"<<endl;
                 if(f.name[0]!='\0')
                 {
                     //登录成功
                     game_flag=1;
                     cout<<game_flag<<endl;
                 }
+                cout<<game_flag<<endl;
                 if(game_flag==1)
                 {
                     if (rooms.empty()) {
@@ -220,13 +221,13 @@ Player  way_choose(char *recvbuffer,Player *buff)
     strcpy(buffer,recvbuffer);
     //分离数组内容，验证是否合法加入
     char *way = strtok(buffer, ",");
-    if (strcmp(way,buffer)==0) {
+    if (strcmp(way,recvbuffer)==0) {
         return emptyPlayer;
     }
     char *message = strtok(NULL,"\0");
     message[strlen(message)-1]='\0';
 
-
+    cout<<message<<endl;
     char name[10];
     char password[10]; 
     int i=0;
@@ -248,7 +249,7 @@ Player  way_choose(char *recvbuffer,Player *buff)
         b++;
     }
     //登录
-    if (strcmp(way, "way:login") == 0)
+    if (strcmp(way,"way:login") == 0)
     {
         while(strlen(buff[i].name)!=0)
         {    
