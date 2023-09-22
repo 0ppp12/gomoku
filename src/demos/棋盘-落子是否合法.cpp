@@ -23,7 +23,6 @@ int main(){
         }
     }
 }
-
 int isDropLegal(int x,int y){
     if(x<1||x>N-1||y<1||y>N-1){
         return 1;
@@ -33,7 +32,6 @@ int isDropLegal(int x,int y){
     }
     return 0;
 }
-
 int emptyBoard(){
     for(int i=0;i<N;i++){
         for(int j=0;j<N;j++){

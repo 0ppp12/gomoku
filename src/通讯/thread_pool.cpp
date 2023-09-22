@@ -1,7 +1,7 @@
 /*** 
  * @Author: PENG
  * @Date: 2023-09-22 13:56:40
- * @LastEditTime: 2023-09-22 15:16:12
+ * @LastEditTime: 2023-09-22 15:57:49
  * @LastEditors: PENG
  * @Description: 
  * @FilePath: \c++\c++ 阶段项目\Gobang\src\通讯\thread_pool.cpp
@@ -289,7 +289,7 @@ bool ThreadPool::destroy_pool(thread_pool *pool)
 
 
 /****************test************************/
-
+/*
 void *mytask(void *arg)
 {
 	
@@ -357,4 +357,4 @@ int main(void)
 	tp.destroy_pool(pool);
 	return 0;
 }
-
+*/

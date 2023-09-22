@@ -26,7 +26,7 @@ void* isAgreeRetract(void*arg){
     while(1){//直到棋局结束才不需要悔棋，故需要一直等这类请求
         char recvbuffer[128]={0};
         if(read(cfdSfd.first,recvbuffer,128)>0){//!
-            isAcceptRequest=1;printf("%d\n",5);
+            isAcceptRequest=1;
         };//接收对方请求悔棋
         if(isAcceptRequest){
             printf("对方请求悔棋，是否同意?(y/n)\n");
@@ -50,7 +50,7 @@ void* isAgreeRetract(void*arg){
     close(cfdSfd.second);
     pthread_exit(NULL);
 }
-inline pair<int,int> tcpAcceptCfd(){
+pair<int,int> tcpAcceptCfd(){
     //1.创建套接字
     int sockfd=socket(AF_INET,SOCK_STREAM,0);
     if(sockfd<0){
