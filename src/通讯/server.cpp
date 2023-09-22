@@ -176,23 +176,57 @@ int main(void)
                             else if (signValue==1)
                             {
                                 //房间未满，还差一个人就满
-                                Player n;
-                                n = f;
-                                n.sockfd = evt[i].data.fd;
-                                member.people[1] = n;
-                                member.sign = 2;
-                                member.num = number_of_rooms;
-                                member_1  = member;
-                                cout<<member_1.people[0].sockfd<<endl;
-                                cout<<member_1.people[1].sockfd<<endl;
-                                cout<<"该房间人数已满"<<endl;
-                                //创建线程？线程函数？
-                                //添加任务
-                                thread.add_task(pool1,Play_And_Communicate,nullptr);
-                                cout<<"该房间不可加入"<<endl;
-                                //已经完成插入，可以退出
-                                number_of_rooms++;
-                                break;
+                                //这时就要判断到底是哪一个人走了
+                                //是黑棋对手还是白棋对手
+                                if (!member.people[0].is_on && member.num!=0)
+                                {
+                                    
+                                    Player n;
+                                    n = f;
+                                    n.sockfd = evt[i].data.fd;
+                                    member.people[0] = n;
+                                    member.sign = 2;
+                                    member_1  = member;
+                                    cout<<"该房间人数已满"<<endl;
+                                    //创建线程？线程函数？
+                                    //添加任务
+                                    thread.add_task(pool1,Play_And_Communicate,nullptr);
+                                    cout<<"该房间不可加入"<<endl;
+                                    break;
+                                }
+                                else if (!member.people[1].is_on && member.num!=0)
+                                {
+                                    Player k;
+                                    k = f;
+                                    k.sockfd = evt[i].data.fd;
+                                    member.people[1] = k;
+                                    member.sign = 2;
+                                    member_1  = member;
+                                    cout<<"该房间人数已满"<<endl;
+                                    //创建线程？线程函数？
+                                    //添加任务
+                                    thread.add_task(pool1,Play_And_Communicate,nullptr);
+                                    cout<<"该房间不可加入"<<endl;
+                                    break;
+                                }
+                                else
+                                {
+                                    Player m;
+                                    m = f;
+                                    m.sockfd = evt[i].data.fd;
+                                    member.people[1] = m;
+                                    member.sign = 2;
+                                    member.num = number_of_rooms;
+                                    member_1  = member;
+                                    cout<<"该房间人数已满"<<endl;
+                                    //创建线程？线程函数？
+                                    //添加任务
+                                    thread.add_task(pool1,Play_And_Communicate,nullptr);
+                                    cout<<"该房间不可加入"<<endl;
+                                    //已经完成插入，可以退出
+                                    number_of_rooms++;
+                                    break;
+                                }
                                 
                             }
                             
@@ -302,7 +336,8 @@ void* Play_And_Communicate(void *arg)
 
     Player &player_1 = member_1.people[0];
     Player &player_2 = member_1.people[1];
-    
+    int room_num = member_1.num;
+    clearRoom(&member_1);
     cout<<player_1.sockfd<<endl;
     cout<<player_2.sockfd<<endl;
     //创建epoll实例
@@ -349,22 +384,71 @@ void* Play_And_Communicate(void *arg)
         //进行主游戏传输过程
         for (int i = 0; i < size; i++)
         {
-            //白旗来消息
+            //黑旗来消息
             if (evt[i].data.fd == player_1.sockfd)
             {
-                cout<<"while"<<endl;
+                char recvbuffer[128]={0};
+                int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
+                if(rsize <= 0)
+                {
+                    //客户端掉线
+                    int eret = epoll_ctl(epfd_01, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                    if(eret<0)
+                    {
+                        perror("del error");
+                        break;
+                    }
+                    close(evt[i].data.fd);
+                    for (auto it = rooms.begin(); it != rooms.end(); ++it) {
+                        std::cout << "Room num = " << it->num << std::endl;
+                        if (it->num==room_num)
+                        {
+                           //这里表示找到了房间
+                           it->sign--;
+                           it->people[0].is_on=0;
+                        }
+                        
+                    }
+
+                    
+                }
+                //数据处理
+                printf("recv:%s\n", recvbuffer);
+                //这里可以考虑在服务器进行逻辑判断输赢
+                //处理完成数据后，对另外一个客户端发送数据
             }
-            else//黑棋来消息
+            else//白棋来消息
             {
-                cout<<"black"<<endl;
+               char recvbuffer2[128]={0};
+                int rsize = recv(evt[i].data.fd, recvbuffer2, 128, 0);
+                if(rsize <= 0)
+                {
+                    //客户端掉线
+                    int eret = epoll_ctl(epfd_01, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                    if(eret<0)
+                    {
+                        perror("del error");
+                        break;
+                    }
+                    close(evt[i].data.fd);
+                     for (auto it = rooms.begin(); it != rooms.end(); ++it) {
+                        std::cout << "Room num = " << it->num << std::endl;
+                        if (it->num==room_num)
+                        {
+                            //这里表示找到了房间
+                            it->sign--;
+                            it->people[1].is_on=0;
+                        }
+                        
+                    }
+                }
+                //数据处理
+                printf("recv2:%s\n", recvbuffer2);
             }
             
         }
         
     }
-    
-
-
 }
 
 //得到名字与密码
@@ -448,6 +532,20 @@ bool File_write(string filename,string info)
     out.close();
     mutex1.unlock();
     return true;
+}
+
+// 清空 Room 结构体数组内所有成员的函数
+void clearRoom(Room *room) {
+    for (int i = 0; i < 2; i++) {
+        // 清空 Player 结构体成员
+        memset(room->people[i].name, 0, sizeof(room->people[i].name));
+        memset(room->people[i].password, 0, sizeof(room->people[i].password));
+        room->people[i].sockfd = 0;
+        memset(room->people[i].play_score, 0, sizeof(room->people[i].play_score));
+        memset(room->people[i].message, 0, sizeof(room->people[i].message));
+    }
+    room->sign = 0;
+    room->num = 0;
 }
 //way:login,account:龙俊豪|password:111111
 //way:register,account:龙俊豪|password:123456

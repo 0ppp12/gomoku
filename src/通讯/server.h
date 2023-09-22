@@ -24,6 +24,7 @@ typedef struct
     int sockfd;
     char play_score[50];
     char message[BUFFER_SIZE];
+    int  is_on;
 } Player;
 
 typedef struct 
@@ -40,3 +41,4 @@ bool File_read(std::string filename,Player *buff);
 bool File_write(std::string filename,std::string info);
 Player  way_choose(char *recvbuffer,Player *buff);
 void Get_NameAndPassword(char *recvbuffer);
+void clearRoom(Room *room);
