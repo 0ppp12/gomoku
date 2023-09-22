@@ -16,6 +16,7 @@
  */
 #include <iostream>
 #include "server.h"
+#include "thread_pool.h"
 using namespace std;
 std::mutex mutex1;
 int game_flag=0;
@@ -24,7 +25,9 @@ vector<Room> rooms;
 
 int main(void)
 {
-    Player player_buffer[50];                                                                                                                             
+    Player player_buffer[50]; 
+    thread_pool *pool1 = new thread_pool;//初始化结构体 
+    ThreadPool thread;//使用类对象                                                                                                                          
     if(!File_read("./info.txt",player_buffer))
     {
         cout<<"读取文件失败"<<endl;
@@ -75,6 +78,13 @@ int main(void)
         return -1;
     }
 
+    //初始化线程
+    int ret1 = thread.init_pool(pool1,10);
+    if (ret1<=0)
+    {
+        perror("init_pool failed!!!\n");
+        return -1;
+    }
     
     while(1)
     {
@@ -169,6 +179,13 @@ int main(void)
                                 member.sign = 2;
                                 member.num = number_of_rooms;
                                 //创建线程？线程函数？
+                                //添加任务
+                                int ret2 = thread.add_task(pool1,Play_And_Communicate, static_cast<void*>(&member));
+                                if (ret2<=0)
+                                {
+                                    perror("init_pool failed!!!\n");
+                                    return -1;
+                                }
 
                                 //已经完成插入，可以退出
                                 number_of_rooms++;
@@ -274,17 +291,18 @@ Player  way_choose(char *recvbuffer,Player *buff)
     return emptyPlayer;
 }
 
-int  Play_And_Communicate(Player& player00,Player& player01)
+void* Play_And_Communicate(void *arg)
 {
-    Player& player_1 = player00;
-    Player& player_2 = player01;
+    Room& play_room =(Room &)arg;
+
+    Player& player_1 = play_room.people[0];
+    Player& player_2 = play_room.people[1];
     
     //创建epoll实例
     int epfd_01 = epoll_create(10);
     if(epfd_01 <0)
     {
         perror("create");
-        return -1;
     }
 
     //分别将两个结构体的中的套接字加入监听队列
@@ -296,7 +314,6 @@ int  Play_And_Communicate(Player& player00,Player& player01)
     if(eret<0)
     {
         perror("add error");
-        return -1;
     }
 
 
@@ -309,7 +326,6 @@ int  Play_And_Communicate(Player& player00,Player& player01)
     if(ret<0)
     {
         perror("add error");
-        return -1;
     }
 
     while (1)
