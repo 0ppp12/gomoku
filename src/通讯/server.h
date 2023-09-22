@@ -22,7 +22,7 @@ typedef struct
     char name[50];
     char password[50];
     int sockfd;
-    int play_score;
+    char play_score[50];
     char message[BUFFER_SIZE];
 } Player;
 
@@ -34,8 +34,9 @@ typedef struct
 }Room;
 
 
-bool File_read(std::string filename,std::string *buff);
-bool File_write(std::string filename,std::string info);
 bool Send_info(int client_socket,int a);
-int way_choose(char *recvbuffer,std::string *buff);
+int Play_And_Communicate(Player& player00,Player& player01);
+bool File_read(std::string filename,Player *buff);
+bool File_write(std::string filename,std::string info);
+Player  way_choose(char *recvbuffer,Player *buff);
 void Get_NameAndPassword(char *recvbuffer);
