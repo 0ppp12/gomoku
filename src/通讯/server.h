@@ -34,6 +34,8 @@ typedef struct
 }Room;
 
 
+bool Send_info(int client_socket,int a);
+int Play_And_Communicate(Player& player00,Player& player01);
 bool File_read(std::string filename,Player *buff);
 bool File_write(std::string filename,std::string info);
 Player  way_choose(char *recvbuffer,Player *buff);

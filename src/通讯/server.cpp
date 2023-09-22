@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-22 15:24:31
+ * @LastEditTime: 2023-09-22 15:55:18
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -17,8 +17,10 @@
 #include <iostream>
 #include "server.h"
 using namespace std;
-std::mutex m;
+std::mutex mutex1;
 int game_flag=0;
+int number_of_rooms;//该变量是房间号
+vector<Room> rooms;
 
 int main(void)
 {
@@ -136,21 +138,61 @@ int main(void)
                     game_flag=1;
                     cout<<game_flag<<endl;
                 }
-                // if(game_flag==1)
-                // {
-                //     //添加套接字
-                //     vector<Room> rooms;
-                //     Room m;
-                //     Get_NameAndPassword(recvbuffer);
-                    
-                //     game_flag = 0;
-                // }
+                if(game_flag==1)
+                {
+                    if (rooms.empty()) {
+                        std::cout << "动态数组为空" << std::endl;
+                        //添加套接字
+                        Player m;
+                        m = f;
+                        m.sockfd = evt[i].data.fd;
+                        Room r;
+                        r.people[0] = m;
+                        rooms.push_back(r);
+                    } else {
+                        std::cout << "动态数组不为空" << std::endl;
+                        for (Room& member :rooms) {
+                            int signValue = member.sign;
+                            std::cout << "sign值: " << signValue << std::endl;
+                            if (signValue==2)
+                            {
+                                //房间已满
+                                continue;
+                            }
+                            else if (signValue==1)
+                            {
+                                //房间未满，还差一个人就满
+                                Player n;
+                                n = f;
+                                n.sockfd = evt[i].data.fd;
+                                member.people[1] = n;
+                                member.sign = 2;
+                                member.num = number_of_rooms;
+                                //创建线程？线程函数？
+
+                                //已经完成插入，可以退出
+                                number_of_rooms++;
+                                break;
+                                
+                            }
+                            
+                        }
+                            Player p;
+                            p = f;
+                            p.sockfd = evt[i].data.fd;
+                            Room o;
+                            o.people[0] = p;
+                            rooms.push_back(o);
+                        
+                    }
+                    game_flag = 0;
+                }
             }
         }
     }
 }
 
-//登录与注册选择
+//选择登录或者注册的模式，并返回玩家的信息结构体
 Player  way_choose(char *recvbuffer,Player *buff)
 {
     Player emptyPlayer;
@@ -232,6 +274,77 @@ Player  way_choose(char *recvbuffer,Player *buff)
     return emptyPlayer;
 }
 
+int  Play_And_Communicate(Player& player00,Player& player01)
+{
+    Player& player_1 = player00;
+    Player& player_2 = player01;
+    
+    //创建epoll实例
+    int epfd_01 = epoll_create(10);
+    if(epfd_01 <0)
+    {
+        perror("create");
+        return -1;
+    }
+
+    //分别将两个结构体的中的套接字加入监听队列
+    //把监听套接字描述符添加到epoll监听队列
+    struct epoll_event event;
+    event.events = EPOLLIN;
+    event.data.fd = player_1.sockfd;
+    int eret = epoll_ctl(epfd_01, EPOLL_CTL_ADD, player_1.sockfd, &event);
+    if(eret<0)
+    {
+        perror("add error");
+        return -1;
+    }
+
+
+    //添加第二个用户的套接字
+    //把监听套接字描述符添加到epoll监听队列
+    struct epoll_event event1;
+    event1.events = EPOLLIN;
+    event1.data.fd = player_2.sockfd;
+    int ret = epoll_ctl(epfd_01, EPOLL_CTL_ADD, player_2.sockfd, &event1);
+    if(ret<0)
+    {
+        perror("add error");
+        return -1;
+    }
+
+    while (1)
+    {
+        //等待事件发生
+        struct epoll_event evt[10];
+        int size = epoll_wait(epfd_01, evt, 10, -1);
+        if(size < 0)
+        {
+            perror("wait error");
+            continue;
+        }
+
+        //进行主游戏传输过程
+        for (int i = 0; i < size; i++)
+        {
+            //白旗来消息
+            if (evt[i].data.fd == player_1.sockfd)
+            {
+                cout<<"while"<<endl;
+            }
+            else//黑棋来消息
+            {
+                cout<<"black"<<endl;
+            }
+            
+        }
+        
+    }
+    
+
+
+}
+
+//得到名字与密码
 void Get_NameAndPassword(char *recvbuffer)
 {
     char delimiters[] = " ,|:"; // 分隔符可以是空格、逗号、问号和感叹号
@@ -258,7 +371,7 @@ void Get_NameAndPassword(char *recvbuffer)
 
 bool File_read(string filename,Player *buff)
 {
-    m.lock();
+    mutex1.lock();
      //1.创建文件输入流--读文件
     ifstream in(filename);
     if(!in.is_open())
@@ -293,13 +406,13 @@ bool File_read(string filename,Player *buff)
         a++;  
     }
     in.close();
-    m.unlock();
+    mutex1.unlock();
     return true;
 }
 
 bool File_write(string filename,string info)
 {
-    m.lock();
+    mutex1.lock();
     //写文件
     ofstream out(filename,std::ios::app);
     if(!out.is_open())
@@ -310,7 +423,7 @@ bool File_write(string filename,string info)
     out<<info+"|score:0";
     out<<'\n';
     out.close();
-    m.unlock();
+    mutex1.unlock();
     return true;
 }
 //way:login,account:龙俊豪|password:111111
