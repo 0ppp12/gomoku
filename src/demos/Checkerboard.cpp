@@ -2,7 +2,7 @@
 #include <iostream>
 #include<vector>
 
-int Checkerboard::checkWin(){
+int Checkerboard::checkWin(char flagWin){
 	int i,j,cou1=0;
 	for(i=y+1;i<N;i++)//'*'落子位置正下方
 		if(gomoku[x][i]==flagWin)
@@ -47,4 +47,15 @@ int Checkerboard::checkWin(){
 		else break;
 	if(cou1>=4) return 1;// /5
 	return 0;//胜负未定
+}
+
+//落子合法判断：返回值：0为合法、1和2为不合法
+int Checkerboard::isDropLegal(){
+    if(x<1||x>N-1||y<1||y>N-1){
+        return 1;
+    }
+    if(gomoku[x][y]!='_'){
+        return 2;
+    }
+    return 0;
 }
