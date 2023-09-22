@@ -42,7 +42,7 @@ int main(void)
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(11451);
+    addr.sin_port = htons(11111);
     addr.sin_addr.s_addr = INADDR_ANY;
     int ret =  bind(sockfd, (struct sockaddr*)(&addr),sizeof(addr));
     if(ret < 0)
@@ -178,9 +178,10 @@ int main(void)
                                 member.people[1] = n;
                                 member.sign = 2;
                                 member.num = number_of_rooms;
+                                Room member_1  = member;
                                 //创建线程？线程函数？
                                 //添加任务
-                                int ret2 = thread.add_task(pool1,Play_And_Communicate, static_cast<void*>(&member));
+                                int ret2 = thread.add_task(pool1,Play_And_Communicate, static_cast<void*>(&member_1));
                                 if (ret2<=0)
                                 {
                                     perror("init_pool failed!!!\n");
