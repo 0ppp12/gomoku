@@ -22,7 +22,7 @@ std::mutex mutex1;
 int game_flag=0;
 int number_of_rooms;//该变量是房间号
 vector<Room> rooms;
-
+Room member_1;//全局数据转运数组
 int main(void)
 {
     Player player_buffer[50]; 
@@ -42,7 +42,7 @@ int main(void)
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(11451);
+    addr.sin_port = htons(9995);
     addr.sin_addr.s_addr = INADDR_ANY;
     int ret =  bind(sockfd, (struct sockaddr*)(&addr),sizeof(addr));
     if(ret < 0)
@@ -127,6 +127,7 @@ int main(void)
                 //读取客户端数据
                 char recvbuffer[128]={0};
                 int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
+                cout<<"socket"<<evt[i].data.fd<<endl;
                 if(rsize <= 0)
                 {
                     //客户端掉线
@@ -156,9 +157,12 @@ int main(void)
                         Player m;
                         m = f;
                         m.sockfd = evt[i].data.fd;
+                        //cout<<"socket"<<m.sockfd<<endl;
                         Room r;
+                        r.sign=1;
                         r.people[0] = m;
                         rooms.push_back(r);
+                        //cout<<"sockett"<<rooms[0].people->sockfd<<endl;
                     } else {
                         std::cout << "动态数组不为空" << std::endl;
                         for (Room& member :rooms) {
@@ -178,16 +182,14 @@ int main(void)
                                 member.people[1] = n;
                                 member.sign = 2;
                                 member.num = number_of_rooms;
-                                Room member_1  = member;
+                                member_1  = member;
+                                cout<<member_1.people[0].sockfd<<endl;
+                                cout<<member_1.people[1].sockfd<<endl;
+                                cout<<"该房间人数已满"<<endl;
                                 //创建线程？线程函数？
                                 //添加任务
-                                int ret2 = thread.add_task(pool1,Play_And_Communicate, static_cast<void*>(&member_1));
-                                if (ret2<=0)
-                                {
-                                    perror("init_pool failed!!!\n");
-                                    return -1;
-                                }
-
+                                thread.add_task(pool1,Play_And_Communicate,nullptr);
+                                cout<<"该房间不可加入"<<endl;
                                 //已经完成插入，可以退出
                                 number_of_rooms++;
                                 break;
@@ -200,6 +202,7 @@ int main(void)
                             p.sockfd = evt[i].data.fd;
                             Room o;
                             o.people[0] = p;
+                            o.sign = 1;
                             rooms.push_back(o);
                         
                     }
@@ -296,11 +299,12 @@ Player  way_choose(char *recvbuffer,Player *buff)
 
 void* Play_And_Communicate(void *arg)
 {
-    Room& play_room =(Room &)arg;
 
-    Player& player_1 = play_room.people[0];
-    Player& player_2 = play_room.people[1];
+    Player &player_1 = member_1.people[0];
+    Player &player_2 = member_1.people[1];
     
+    cout<<player_1.sockfd<<endl;
+    cout<<player_2.sockfd<<endl;
     //创建epoll实例
     int epfd_01 = epoll_create(10);
     if(epfd_01 <0)
@@ -316,7 +320,7 @@ void* Play_And_Communicate(void *arg)
     int eret = epoll_ctl(epfd_01, EPOLL_CTL_ADD, player_1.sockfd, &event);
     if(eret<0)
     {
-        perror("add error");
+        perror("add error01");
     }
 
 
@@ -328,7 +332,7 @@ void* Play_And_Communicate(void *arg)
     int ret = epoll_ctl(epfd_01, EPOLL_CTL_ADD, player_2.sockfd, &event1);
     if(ret<0)
     {
-        perror("add error");
+        perror("add error02");
     }
 
     while (1)
