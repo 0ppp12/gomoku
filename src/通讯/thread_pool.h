@@ -1,7 +1,7 @@
 /*** 
  * @Author: PENG
  * @Date: 2023-09-22 14:24:41
- * @LastEditTime: 2023-09-22 15:21:06
+ * @LastEditTime: 2023-09-22 15:50:10
  * @LastEditors: PENG
  * @Description: 
  * @FilePath: \c++\c++ 阶段项目\Gobang\src\通讯\thread_pool.h
@@ -51,9 +51,14 @@ class ThreadPool{
 public:
     ThreadPool();
     ~ThreadPool();
+    /*初始化线程，参数1为thread_pool结构体，参数2为初始化线程数*/
     bool init_pool(thread_pool *pool, unsigned int threads_number);
+    /*添加任务，参数1为thread_pool结构体，参数2为任务函数指针，参数3为参数*/
     bool add_task(thread_pool *pool, void *(*do_task)(void *arg), void *task);
+    /*添加线程，参数1为thread_pool结构体，参数2为添加的线程数*/
     int  add_thread(thread_pool *pool, unsigned int additional_threads_number);
+    /*删除线程，参数1为thread_pool结构体，参数2为删除的线程数*/
     int  remove_thread(thread_pool *pool, unsigned int removing_threads_number);
+    /*销毁线程池*/
     bool destroy_pool(thread_pool *pool);
 };
