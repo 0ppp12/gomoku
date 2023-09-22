@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-22 16:04:53
+ * @LastEditTime: 2023-09-22 16:06:28
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -202,7 +202,7 @@ Player  way_choose(char *recvbuffer,Player *buff)
     strcpy(buffer,recvbuffer);
     //分离数组内容，验证是否合法加入
     char *way = strtok(buffer, ",");
-    if (way != NULL) {
+    if (way == NULL) {
         return emptyPlayer;
     }
     char *message = strtok(NULL,"\0");
