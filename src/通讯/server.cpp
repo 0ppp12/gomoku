@@ -75,6 +75,7 @@ int main(void)
         return -1;
     }
 
+    
     while(1)
     {
         //等待事件发生
@@ -489,9 +490,11 @@ bool File_write(string filename,string info)
         cout<<"写打开失败"<<endl;
         return false;
     }
-    out<<info;
+    out<<info+"|score:0";
     out<<'\n';
     out.close();
     mutex1.unlock();
     return true;
 }
+//way:login,account:龙俊豪|password:111111
+//way:register,account:龙俊豪|password:123456

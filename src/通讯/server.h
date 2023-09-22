@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>  // 包含网络相关函数的头文件
+#include <arpa/inet.h>  // 鍖呭惈缃戠粶鐩稿叧鍑芥暟鐨勫ご鏂囦欢
 #include <sys/epoll.h>
 
 #define BUFFER_SIZE 1024
