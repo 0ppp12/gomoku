@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/Users/Administrator.Bili-2022AOYNWU/Desktop/4/the-gobang-game-of-cc-md-fk/src/demos",
-      "program": "d:/Users/Administrator.Bili-2022AOYNWU/Desktop/4/the-gobang-game-of-cc-md-fk/src/demos/build/Debug/outDebug",
+      "cwd": "d:/Users/Administrator.Bili-2022AOYNWU/Desktop/3/the-gobang-game-of-cc-md-fk/src/demos",
+      "program": "d:/Users/Administrator.Bili-2022AOYNWU/Desktop/3/the-gobang-game-of-cc-md-fk/src/demos/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
