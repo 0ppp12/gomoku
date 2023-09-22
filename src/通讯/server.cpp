@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-21 19:50:35
+ * @LastEditTime: 2023-09-22 15:55:18
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -192,47 +192,6 @@ int main(void)
     }
 }
 
-
-// //登录与注册选择
-// int way_choose(char *recvbuffer,std::string *buff)
-// {
-//     char buffer[128]={0};
-//     strcpy(buffer,recvbuffer);
-//     //分离数组内容，验证是否合法加入
-//     char *way = strtok(buffer, ",");
-//     char *message = strtok(NULL,"\0");
-//     cout<<way<<endl;
-//     cout<<message<<endl;
-//     int i=0;
-//     //登录
-//     if (strcmp(way, "way:login") == 0)
-//     {
-//         while(buff[i].length()!=0)
-//         {
-//             if (strcmp(buff[i].c_str(), message) == 0)
-//             {
-//                 cout << "登录成功" << endl;
-//                 return 1;
-//             }
-//             i++;
-//         }
-//         cout << "登录失败" << endl;
-//     }
-//     //注册
-//     else if(strcmp(way,"way:register")==0)
-//     {
-//         if(File_write("./info.txt",message))
-//         {
-//             if(!File_read("./info.txt",buff))
-//             {
-//                 cout<<"读取文件失败"<<endl;
-//                 return 0;
-//             }
-//             return 2;
-//         }
-//     }
-//     return 0;
-// }
 //选择登录或者注册的模式，并返回玩家的信息结构体
 Player  way_choose(char *recvbuffer,Player *buff)
 {
@@ -384,35 +343,6 @@ int  Play_And_Communicate(Player& player00,Player& player01)
 
 
 }
-
-// Player Get_NameAndPassword(char *recvbuffer)
-// {
-//     char delimiters[] = " ,|:"; // 分隔符可以是空格、逗号、问号和感叹号
-//     char* token = std::strtok(recvbuffer, delimiters);
-//     char name[50];
-//     char password[50];
-//     int a=0;
-//     while (token != nullptr) {
-//         if(a==3)
-//         {
-//             strcpy(name,token);
-//         }
-//         if(a==5)
-//         {
-//             strcpy(password,token);
-//             break;
-//         }
-//         token = std::strtok(nullptr, delimiters);
-//         a++;
-//     }
-//     cout<<name<<endl;
-//     cout<<password<<endl;
-//     Player m;
-//     strcpy(m.name,name);
-//     strcpy(m.password,password);
-
-//     return m;
-// }
 
 //得到名字与密码
 void Get_NameAndPassword(char *recvbuffer)
