@@ -1,3 +1,7 @@
+/*
+g++ 棋手-悔棋-决定是否同意.cpp -pthread&&./a.out
+g++ 棋手-悔棋-请求同意悔棋.cpp&&./a.out
+*/
 #include <iostream>
 #include <pthread.h>
 #include <sys/types.h>
@@ -25,9 +29,11 @@ void* isAgreeRetract(void*arg){
     pair<int,int> cfdSfd=tcpAcceptCfd();
     while(1){//直到棋局结束才不需要悔棋，故需要一直等这类请求
         char recvbuffer[128]={0};
-        if(read(cfdSfd.first,recvbuffer,128)>0){//!
-            isAcceptRequest=1;
-        };//接收对方请求悔棋
+        if(0==isAcceptRequest){
+            if(read(cfdSfd.first,recvbuffer,128)>0){//!
+                isAcceptRequest=1;
+            }//接收对方请求悔棋
+        }
         if(isAcceptRequest){
             printf("对方请求悔棋，是否同意?(y/n)\n");
             cin>>r;
@@ -43,6 +49,7 @@ void* isAgreeRetract(void*arg){
                 isAcceptRequest=0;
             } else{
                 printf("输入有误，请重新输入(y/n)\n");
+                isAcceptRequest=1;
             }
         }
     }

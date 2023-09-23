@@ -1,3 +1,7 @@
+/* 
+g++ 棋手-悔棋-决定是否同意.cpp -pthread&&./a.out
+g++ 棋手-悔棋-请求同意悔棋.cpp&&./a.out
+ */
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>

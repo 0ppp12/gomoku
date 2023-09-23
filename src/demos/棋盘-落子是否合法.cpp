@@ -1,3 +1,6 @@
+/*
+g++ 棋盘-落子是否合法.cpp&&./a.out
+*/
 #include <iostream>
 using namespace std;
 #define N 15 //棋盘规模
@@ -7,9 +10,9 @@ int emptyBoard();//清空棋盘
 int main(){
     emptyBoard();
     int x,y;
-    printf("client 请下棋：\n");
+    printf("client 请下棋(x,y)：\n");
     for(int i=0;i<10;i++){
-        cin>>x>>y;
+        scanf("%d,%d",&x,&y);
         int flag=isDropLegal(x,y);
         if(flag==0){
             printf("落子合法，不提示，允许落子\n");

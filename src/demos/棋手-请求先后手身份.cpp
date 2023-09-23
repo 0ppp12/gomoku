@@ -1,3 +1,8 @@
+/* 
+g++ 服务端-分配先后手身份.cpp&&./a.out
+g++ 棋手-请求先后手身份.cpp&&./a.out
+g++ 棋手-请求先后手身份.cpp&&./a.out
+ */
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -15,7 +20,7 @@ int main(){
 int sendGetColorRequest(int serverSockfd){
     char buffer[128]={0};
     strcpy(buffer,"请求告知先后手身份");
-    printf("请求告知先后手身份 %d\n",send(serverSockfd,buffer,sizeof(buffer),0));//!发送 请求
+    send(serverSockfd,buffer,sizeof(buffer),0);//!发送 请求
     char color;
     read(serverSockfd,&color,1);//!接收 请求处理结果
     if(color=='*'){

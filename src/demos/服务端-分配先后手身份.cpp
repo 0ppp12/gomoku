@@ -1,3 +1,7 @@
+/* 
+g++ 服务端-分配先后手身份.cpp&&./a.out
+g++ 棋手-请求先后手身份.cpp&&./a.out
+ */
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>

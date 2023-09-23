@@ -1,3 +1,8 @@
+/*
+g++ 服务端-转发- 落子数据.cpp&&./a.out
+g++ 棋手-收发落子情况.cpp&&./a.out
+g++ 棋手-收发落子情况.cpp&&./a.out
+*/
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -6,7 +11,7 @@
 #include<cstring>
 #include<unistd.h>
 using namespace std;
-#define PORT 9984
+#define PORT 9985
 int getServerSockfd();
 int sendGetColorRequest(int serverSockfd);
 int recvSendDropRequest(int serverSockfd,char color);
@@ -19,10 +24,10 @@ int main(){
     //接收黑子落子请求          发送落子请求
 // while(1){
     //发送黑子落子情况给白子                    接收对手落子情况
-    ////发送落子通知给白子                        接收落子通知
+    //发送落子通知给白子                        接收落子通知
     //接收白子落子请求                           发送落子请求
     //发送白子落子情况给黑子    接收对手落子情况
-    ////发送落子通知给黑子        接收落子通知
+    //发送落子通知给黑子        接收落子通知
     //接收黑子落子请求          发送落子请求
 // }
     int serverSockfd=getServerSockfd();//连接服务端  发送先后手请求  
@@ -47,16 +52,14 @@ int recvSendDropRequest(int serverSockfd,char color){
     }
     while(1){
         memset(recvbuf,0,sizeof(recvbuf));
-        read(serverSockfd,recvbuf,128);//接收对手落子情况
+        read(serverSockfd,recvbuf,38);//接收对手落子情况,(之所以设置为38是因为要联系读2次，读多了下面的read就没的读了)
         sscanf(recvbuf,"{way:down,local:(%d,%d)",&x,&y);
         //将x,y转化为本地字节序
         x=ntohs(x);
         y=ntohs(y);
         printf("%d,%d\n",x,y);
         memset(recvbuf,0,sizeof(recvbuf));
-        printf("1\n");
-        // read(serverSockfd,recvbuf,128);//接收落子通知
-        printf("2\n");
+        read(serverSockfd,recvbuf,128);//接收落子通知
         memset(sendbuf,0,sizeof(sendbuf));
         printf("请输入棋子坐标(x,y)\n");
         scanf("%d,%d",&x,&y);
@@ -68,7 +71,7 @@ int recvSendDropRequest(int serverSockfd,char color){
         } else if(color=='*'){
             sprintf(sendbuf,"{way:down,local:(%d,%d),color:black}",x,y);
         }
-        printf("%d--",write(serverSockfd,sendbuf,strlen(sendbuf)));//发送落子请求
+        write(serverSockfd,sendbuf,strlen(sendbuf));//发送落子请求
     }
 }
 int sendGetColorRequest(int serverSockfd){
