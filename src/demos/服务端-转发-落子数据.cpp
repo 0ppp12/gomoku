@@ -1,3 +1,8 @@
+/*
+g++ 服务端-转发- 落子数据.cpp&&./a.out
+g++ 棋手-收发落子情况.cpp&&./a.out
+g++ 棋手-收发落子情况.cpp&&./a.out
+*/
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -6,7 +11,7 @@
 #include<cstring>
 #include<unistd.h>
 using namespace std;
-#define PORT 9984
+#define PORT 9985
 int tcpInit();
 pair<int,int> tcpAcceptCfd(int sockfd);
 pair<int,int> sendSetColor();
@@ -48,15 +53,12 @@ int forwardHeiBaiRequest(int heifd,int baifd){
     printf("%d,%d\n",x,y);
     sscanf(recvbuf,"way:down,local:(%d,%d)",&x,&y);
     while(1){
-        write(baifd,recvbuf,strlen(recvbuf));//!发送黑子落子情况给白子
+        cout<<write(baifd,recvbuf,strlen(recvbuf));//!发送黑子落子情况给白子
         memset(sendbuf,0,128);
         strcpy(sendbuf,"该你落子了");
-        // printf("%d--baifd:%d\n",write(baifd,sendbuf,strlen(sendbuf)),baifd);//!发送落子通知给白子 
-        // printf("%d--baifd:%d\n",write(baifd,sendbuf,strlen(sendbuf)),baifd);//!发送落子通知给白子 
+        write(baifd,sendbuf,strlen(sendbuf));//!发送落子通知给白子 
         memset(recvbuf,0,128);
-        printf("1\n");
         read(baifd,recvbuf,128);//!接收白子落子请求
-        printf("2\n");
         sscanf(recvbuf,"{way:down,local:(%d,%d)",&x,&y);
         //将x,y转化为本地字节序
         x=ntohs(x);
@@ -67,9 +69,7 @@ int forwardHeiBaiRequest(int heifd,int baifd){
         strcpy(sendbuf,"该你落子了");
         write(heifd,sendbuf,strlen(sendbuf));//!发送落子通知给黑子
         memset(recvbuf,0,128);
-        printf("3\n");
         read(heifd,recvbuf,128);//!接收黑子落子请求
-        printf("4\n");
         sscanf(recvbuf,"{way:down,local:(%d,%d)",&x,&y);
         //将x,y转化为本地字节序
         x=ntohs(x);
