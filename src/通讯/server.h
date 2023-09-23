@@ -32,6 +32,8 @@ typedef struct
     Player people[2];
     int sign;
     int num;
+    Player watch_people[5];
+    int wtach_sign;
 }Room;
 
 

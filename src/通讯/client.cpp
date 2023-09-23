@@ -6,10 +6,11 @@
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\client.cpp
  * @Description: ???????????,??????`customMade`, ??koroFileHeader?????? ????????: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-#include <iostream>
+
 #include "client.h"
 
-int main()
+
+int Info_SendAndRev::INIT_SOCKET(const char* SERVER_IP,int PORT)
 {
     //创建套接字
     int client_socket;
@@ -26,12 +27,12 @@ int main()
     // 设置服务器地址
     server_address.sin_family = AF_INET;
     // server_address.sin_addr.s_addr = inet_addr("192.168.13.64");
-    if (inet_pton(AF_INET, "192.168.13.68", &(server_address.sin_addr)) <= 0)
+    if (inet_pton(AF_INET, SERVER_IP, &(server_address.sin_addr)) <= 0)
     {
         std::cerr << "Invalid address/ Address not supported" << std::endl;
         return 1;
     }
-    server_address.sin_port = htons(11451);
+    server_address.sin_port = htons(PORT);
 
     // 连接到服务器
     if (connect(client_socket, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) 
@@ -39,32 +40,10 @@ int main()
         perror("connect");
         return 1;
     }
-
-
-    //模式选择
-    int login_flag;
-    string name;
-    string password;
-    Info_SendAndRev player;
-    std::cin>>login_flag;
-    std::cin>>name;
-    std::cin>>password;
-     //信息发送
-    Send_info(client_socket,login_flag,name,password);
-
-    close(client_socket);
-    return 0;
+    return client_socket;
 }
 
-class Info_SendAndRev{
-public:
-    bool Send_NameAndPassword(int client_socket,int a,string name,string password);
-    bool Send_Checkerboard_Info(int client_socket);
-    bool Rev_info(int client_socket,char * recvbuffer);
-    
-    std::string client_name;
-    std::string client_password;
-}
+
 
 //登录信息或者注册信息发送
 bool Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string name,string password)
@@ -102,6 +81,7 @@ bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket)
     //悔棋：way:back,local:(x,y)|color:black/white
     //这是例子
     //应当发送整个棋盘信息a[x][y] = 0无 1黑 2白
+    return true;
 
 }
 //接收信息
@@ -122,4 +102,13 @@ bool Info_SendAndRev::Rev_info(int client_socket,char * recvbuffer)
     加入房间:way:join,object:xxx
     或者更多
     */
+   return true;
 }
+
+/*******************test*****************/
+// int main(){
+//     Info_SendAndRev info;
+//     int client_socket = info.INIT_SOCKET("192.168.13.64",9995);
+//     info.Send_NameAndPassword(client_socket,0,"victor","123456");
+//     return 0;
+// }

@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-22 17:14:57
+ * @LastEditTime: 2023-09-23 10:55:28
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -261,7 +261,7 @@ Player  way_choose(char *recvbuffer,Player *buff)
         return emptyPlayer;
     }
     char *message = strtok(NULL,"\0");
-    message[strlen(message)-1]='\0';
+    message[strlen(message)]='\0';
 
     cout<<message<<endl;
     char name[10];
