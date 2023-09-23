@@ -123,11 +123,19 @@ int Checkerboard::Receive(){
     }
 
 	//解析接收到的数据
-	sscanf(recvbuffer.c_str(), "{way:down,local:(%d,%d),color:black}",&opponent_x, &opponent_y);
+	sscanf(recvbuffer.c_str(), "{way:down,local:(%d,%d),color:%s}",&opponent_x, &opponent_y, opponent_id.c_str());
 	std::cout<< "local:("<< opponent_x << ',' << opponent_y << ')' <<std::endl;
 
-	//将数据更新到
+	//将数据更新到棋盘数组
+	if (opponent_id.c_str() == "black")
+	{
+		gomoku[opponent_x][opponent_y] = 'B';
+	}
+	else if (opponent_id.c_str() == "white")
+	{
+		gomoku[opponent_x][opponent_y] = 'W';
+	}
 
 	//打印接收到的数据
-	std::cout<< recvbuffer.c_str() <<std::endl;
+	std::cout<< "recver :  " <<recvbuffer.c_str() <<std::endl;
 }

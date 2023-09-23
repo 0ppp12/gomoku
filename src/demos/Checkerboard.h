@@ -1,6 +1,6 @@
 #pragma once
-
-#define N 15 //棋盘规模
+#include <iostream>
+#define N 13 //棋盘规模
 
 class Checkerboard{
 public:
