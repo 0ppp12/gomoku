@@ -106,9 +106,9 @@ bool Info_SendAndRev::Rev_info(int client_socket,char * recvbuffer)
 }
 
 /*******************test*****************/
-// int main(){
-//     Info_SendAndRev info;
-//     int client_socket = info.INIT_SOCKET("192.168.13.64",9995);
-//     info.Send_NameAndPassword(client_socket,0,"victor","123456");
-//     return 0;
-// }
+int main(){
+    Info_SendAndRev info;
+    int client_socket = info.INIT_SOCKET("172.19.255.126",9995);
+    info.Send_NameAndPassword(client_socket,0,"victor","123456");
+    return 0;
+}
