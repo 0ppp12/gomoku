@@ -46,7 +46,7 @@ int Info_SendAndRev::INIT_SOCKET(const char* SERVER_IP,int PORT)
 
 
 //登录信息或者注册信息发送
-bool Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string name,string password)
+char * Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string name,string password)
 {
     std::string client_info;
     client_info.clear();
@@ -67,20 +67,29 @@ bool Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string nam
     {
         //错误处理
         std::cout<<"发送失败"<<std::endl;
-        return false;
     }
-    return true;
+    //接收
+    static char recvbuffer[128];
+    if(recv(client_socket, recvbuffer, 128, 0)<0)
+    {
+        cout<< "接收失败"<<endl;
+    }
+    return recvbuffer;
 }
-//发送棋盘信息
-bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket)
-{
-    //发送数组
 
-    //整合信息，发送前置协议
-    //下棋：way:down,local:(x,y)|color:black/white
-    //悔棋：way:back,local:(x,y)|color:black/white
-    //这是例子
-    //应当发送整个棋盘信息a[x][y] = 0无 1黑 2白
+//发送棋盘信息
+bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket,char a[13][13])
+{
+    // string Checkerboard_Info;
+    // //发送数组
+    // Checkerboard_Info="way:Checkerboard_Info,arry:"+a;
+    // //发送
+    // if(send(client_socket, Checkerboard_Info.c_str(), Checkerboard_Info.length(), 0)<0)
+    // {
+    //     //错误处理
+    //     std::cout<<"发送失败"<<std::endl;
+    //     return false;
+    // }
     return true;
 
 }
@@ -106,9 +115,10 @@ bool Info_SendAndRev::Rev_info(int client_socket,char * recvbuffer)
 }
 
 /*******************test*****************/
-// int main(){
-//     Info_SendAndRev info;
-//     int client_socket = info.INIT_SOCKET("192.168.13.64",9995);
-//     info.Send_NameAndPassword(client_socket,0,"victor","123456");
-//     return 0;
-// }
+int main(){
+    Info_SendAndRev info;
+    int client_socket = info.INIT_SOCKET("192.168.13.64",9999);
+    string recvbuffer =info.Send_NameAndPassword(client_socket,0,"victor","123456");
+    cout << recvbuffer.c_str() << endl;
+    return 0;
+}
