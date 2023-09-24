@@ -43,12 +43,14 @@ int Player::sendGetColorRequest(int serverSockfd){
     char buffer[128]={0};
     strcpy(buffer,"请求告知先后手身份");
     send(serverSockfd,buffer,sizeof(buffer),0);//!发送 请求
-    char color;
-    read(serverSockfd,&color,1);//!接收 请求处理结果
-    if(color=='B'){
-        printf("我是先手 color=*\n");
+    // char color;
+    read(serverSockfd,&this->color,1);//!接收 请求处理结果
+    if(this->color=='B'){
+        printf("我是先手 color=B\n");
+        this->color='B';
     } else if(color=='W'){
-        printf("我是后手 color=0\n");
+        printf("我是后手 color=W\n");
+        this->color='W';
     }
     return color;
 }
@@ -70,6 +72,7 @@ int Player::getServerSockfd(){
         perror("connect");
         return -1;
     }
+    this->serverSockfd=sockfd;
     return sockfd;
 }
 int Player::sendRetractRequest(int serverSockfd){

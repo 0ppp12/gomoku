@@ -11,11 +11,16 @@ g++ 棋手-收发落子情况.cpp&&./a.out
 #include<cstring>
 #include<unistd.h>
 using namespace std;
-#define PORT 9985
+#define PORT 1888
 int getServerSockfd();
 int sendGetColorRequest(int serverSockfd);
 int recvSendDropRequest(int serverSockfd,char color);
 int main(){
+    int serverSockfd=getServerSockfd();//连接服务端  发送先后手请求  
+    char color=sendGetColorRequest(serverSockfd);//接收身份颜色 
+    recvSendDropRequest(serverSockfd,color);
+}
+int recvSendDropRequest(int serverSockfd,char color){
     //服务端                    先手黑子        后手白纸
     //接收2玩家连接             连接服务端      连接服务端
     //接收2个先后手身份请求      发送先后手请求  发送先后手请求
@@ -30,11 +35,6 @@ int main(){
     //发送落子通知给黑子        接收落子通知
     //接收黑子落子请求          发送落子请求
 // }
-    int serverSockfd=getServerSockfd();//连接服务端  发送先后手请求  
-    char color=sendGetColorRequest(serverSockfd);//接收身份颜色 
-    recvSendDropRequest(serverSockfd,color);
-}
-int recvSendDropRequest(int serverSockfd,char color){
     char recvbuf[128];
     char sendbuf[128];
     int x,y;

@@ -1,50 +1,12 @@
-/*
-g++ 服务端-转发-落子数据.cpp&&./a.out
-g++ 棋手-收发落子情况.cpp&&./a.out
-g++ 棋手-收发落子情况.cpp&&./a.out
-*/
-#include <iostream>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include<cstring>
-#include<unistd.h>
-using namespace std;
-#define PORT 1888
-int tcpInit();
-int tcpAcceptCfd(int sockfd);
-pair<int,int> sendSetColor();
-int forwardHeiBaiRequest(int heifd,int baifd);
-int main(){
-    pair<int,int> fds=sendSetColor();
-    int heifd=fds.first;
-    int baifd=fds.second;
-    forwardHeiBaiRequest(heifd,baifd);
-    return 0;
-}
-int forwardHeiBaiRequest(int heifd,int baifd){
-    //服务端                    先手黑子        后手白纸
-    //接收2玩家连接             连接服务端      连接服务端
-    //接收2个先后手身份请求      发送先后手请求  发送先后手请求
-    //随机先2玩家发送身份       接收身份颜色    接收身份颜色
-    //发送先手落子通知给黑子     接收落子通知
-    //接收黑子落子请求          发送落子请求
-// while(1){
-    //发送黑子落子情况给白子                    接收对手落子情况
-    //发送落子通知给白子                        接收落子通知
-    //接收白子落子请求                           发送落子请求
-    //发送白子落子情况给黑子    接收对手落子情况
-    //发送落子通知给黑子        接收落子通知
-    //接收黑子落子请求          发送落子请求
-// }
+#include "./server.h"
+int Server::forwardHeiBaiRequest(int heifd,int baifd){
     char sendbuf[128];
     memset(sendbuf,0,128);
     strcpy(sendbuf,"该你落子了");
     write(heifd,sendbuf,strlen(sendbuf));//!发送先手落子通知给黑子
     char recvbuf[128];
     memset(recvbuf,0,128);
-    read(heifd,recvbuf,sizeof(recvbuf));//!接收黑子落子请求
+    int r=read(heifd,recvbuf,sizeof(recvbuf));//!接收黑子落子请求
     int x,y;
     sscanf(recvbuf,"{way:down,local:(%d,%d)",&x,&y);
     //将x,y转化为本地字节序
@@ -53,8 +15,7 @@ int forwardHeiBaiRequest(int heifd,int baifd){
     printf("%d,%d\n",x,y);
     sscanf(recvbuf,"way:down,local:(%d,%d)",&x,&y);
     while(1){
-        int len=write(baifd,recvbuf,strlen(recvbuf));//!发送黑子落子情况给白子
-        // printf("%d\n",len);
+        write(baifd,recvbuf,strlen(recvbuf));//!发送黑子落子情况给白子
         memset(sendbuf,0,128);
         strcpy(sendbuf,"该你落子了");
         write(baifd,sendbuf,strlen(sendbuf));//!发送落子通知给白子 
@@ -78,10 +39,10 @@ int forwardHeiBaiRequest(int heifd,int baifd){
         printf("%d,%d\n",x,y);
     }
 }
-pair<int,int> sendSetColor(){
+pair<int,int> Server::sendSetColor(){
     int sockfd=tcpInit();
-    int cfd=tcpAcceptCfd(sockfd);//!接收2玩家连接 
-    int cfd2=tcpAcceptCfd(sockfd);
+    int cfd=Server::tcpAcceptCfd(sockfd);//!接收2玩家连接 
+    int cfd2=Server::tcpAcceptCfd(sockfd);
     char recvbuffer[128]={0};
     char recvbuffer2[128]={0};
     int request1=read(cfd,recvbuffer,128);
@@ -106,7 +67,7 @@ pair<int,int> sendSetColor(){
     }
     return make_pair(heifd,baifd);
 }
-int tcpAcceptCfd(int sockfd){
+int Server::tcpAcceptCfd(int sockfd){
     //4.接受连接（默认是阻塞）
     struct sockaddr_in clientaddr;
     socklen_t len=sizeof(clientaddr);
@@ -118,7 +79,7 @@ int tcpAcceptCfd(int sockfd){
     printf("客户端IP:%s\n",inet_ntoa(clientaddr.sin_addr));
     return clientfd;
 }
-int tcpInit(){
+int Server::tcpInit(){
     //1.创建套接字
     int sockfd=socket(AF_INET,SOCK_STREAM,0);
     if(sockfd<0){
@@ -141,5 +102,6 @@ int tcpInit(){
         perror("listen");
         return -1;
     }
+    this->sockfd=sockfd;
     return sockfd;
 }

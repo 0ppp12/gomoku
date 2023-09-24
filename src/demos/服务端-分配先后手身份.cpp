@@ -10,6 +10,7 @@ g++ 棋手-请求先后手身份.cpp&&./a.out
 #include<cstring>
 #include<unistd.h>
 using namespace std;
+#define PORT 8888
 int tcpInit();
 pair<int,int> tcpAcceptCfd(int sockfd);
 int main(){
@@ -58,7 +59,7 @@ int tcpInit(){
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family=AF_INET;
-    addr.sin_port=htons(9996);
+    addr.sin_port=htons(PORT);
     addr.sin_addr.s_addr=INADDR_ANY;
     int ret=bind(sockfd,(struct sockaddr*)(&addr),sizeof(addr));
     if(ret<0){
