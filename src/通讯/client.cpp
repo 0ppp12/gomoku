@@ -115,10 +115,10 @@ bool Info_SendAndRev::Rev_info(int client_socket,char * recvbuffer)
 }
 
 /*******************test*****************/
-int main(){
-    Info_SendAndRev info;
-    int client_socket = info.INIT_SOCKET("192.168.13.64",9999);
-    string recvbuffer =info.Send_NameAndPassword(client_socket,0,"victor","123456");
-    cout << recvbuffer.c_str() << endl;
-    return 0;
-}
+// int main(){
+//     Info_SendAndRev info;
+//     int client_socket = info.INIT_SOCKET("192.168.13.64",9999);
+//     string recvbuffer =info.Send_NameAndPassword(client_socket,0,"victor","123456");
+//     cout << recvbuffer.c_str() << endl;
+//     return 0;
+// }
