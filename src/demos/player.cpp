@@ -1,9 +1,9 @@
 #include "player.h"
-int Player::recvSendDropRequest(int serverSockfd,char color){
+int Player::recvSendDropRequest(int serverSockfd){
     char recvbuf[128];
     char sendbuf[128];
     int x,y;
-    if(color=='B'){
+    if(this->color=='B'){
         memset(recvbuf,0,sizeof(recvbuf));
         read(serverSockfd,recvbuf,128);// 接收落子通知
         memset(sendbuf,0,sizeof(sendbuf));
@@ -31,9 +31,9 @@ int Player::recvSendDropRequest(int serverSockfd,char color){
         //将x,y转化为网络字节序
         x=htons(x);
         y=htons(y);
-        if(color=='W'){
+        if(this->color=='W'){
             sprintf(sendbuf,"{way:down,local:(%d,%d),color:white}",x,y);
-        } else if(color=='B'){
+        } else if(this->color=='B'){
             sprintf(sendbuf,"{way:down,local:(%d,%d),color:black}",x,y);
         }
         write(serverSockfd,sendbuf,strlen(sendbuf));//发送落子请求

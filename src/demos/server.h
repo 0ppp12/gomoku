@@ -7,7 +7,7 @@
 #include<cstring>
 #include<unistd.h>
 using namespace std;
-#define PORT 2888
+#define PORT 1888
 class Server{
     public:
     int sockfd;
