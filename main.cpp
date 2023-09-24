@@ -19,10 +19,14 @@ extern "C"
 
 
 #define DISP_BUF_SIZE (128 * 800)   //显示缓冲区
-#define BLACKGRAND_PATH "S:/lzktemp/blackgrand.jpg"  //开始界面背景
-#define BLACKGRAND_PATH2 "S:/lzktemp/bg.jpg"        //登陆注册界面背景
-#define KETPAN_PATH "S:/lzktemp/Pan.jpg" //下棋界面棋盘
-#define KETPAN_BG_PATH "S:/lzktemp/Pan_bg.jpg" //下棋界面棋盘
+// #define BLACKGRAND_PATH "S:/lzktemp/blackgrand.jpg"  //开始界面背景
+// #define BLACKGRAND_PATH2 "S:/lzktemp/bg.jpg"        //登陆注册界面背景
+// #define KETPAN_PATH "S:/lzktemp/Pan.jpg" //下棋界面棋盘
+// #define KETPAN_BG_PATH "S:/lzktemp/Pan_bg.jpg" //下棋界面棋盘
+#define BLACKGRAND_PATH "../../lzktemp/blackgrand.jpg"  //开始界面背景
+#define BLACKGRAND_PATH2 "../../lzktemp/bg.jpg"        //登陆注册界面背景
+#define KETPAN_PATH "../../lzktemp/Pan.jpg" //下棋界面棋盘
+#define KETPAN_BG_PATH "../../lzktemp/Pan_bg.jpg" //下棋界面棋盘
 #define LOGIN 1     //登陆
 #define REGISTER 0  //注册
 
