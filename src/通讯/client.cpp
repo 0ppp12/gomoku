@@ -43,8 +43,6 @@ int Info_SendAndRev::INIT_SOCKET(const char* SERVER_IP,int PORT)
     return client_socket;
 }
 
-
-
 //登录信息或者注册信息发送
 char * Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string name,string password)
 {
@@ -78,20 +76,47 @@ char * Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string n
 }
 
 //发送棋盘信息
-bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket,char a[13][13])
+bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket,int a[13][13])
 {
-    // string Checkerboard_Info;
-    // //发送数组
-    // Checkerboard_Info="way:Checkerboard_Info,arry:"+a;
-    // //发送
-    // if(send(client_socket, Checkerboard_Info.c_str(), Checkerboard_Info.length(), 0)<0)
-    // {
-    //     //错误处理
-    //     std::cout<<"发送失败"<<std::endl;
-    //     return false;
-    // }
+    string Checkerboard_Info;
+    //发送数组
+    string b;
+    for(int i=0;i<13;i++){
+        for(int j=0;j<13;j++){
+            b+=to_string(a[i][j]);
+        }
+    }
+    Checkerboard_Info="way:Checkerboard_Info,arry|"+b;
+    //发送
+    if(send(client_socket, Checkerboard_Info.c_str(), Checkerboard_Info.length(), 0)<0)
+    {
+        //错误处理
+        std::cout<<"发送失败"<<std::endl;
+        return false;
+    }
+    cout<<Checkerboard_Info<<endl;
     return true;
+}
 
+// 接收棋盘信息
+int **Info_SendAndRev::Recv_Checkerboard_Info(int client_socket){
+    //接收
+    static char recvbuffer[128];
+    if(recv(client_socket, recvbuffer, 128, 0)<0)
+    {
+        cout<< "接收失败"<<endl;
+    }
+    //解包
+    char *way = strtok(recvbuffer, "|");
+    char *arry = strtok(NULL, "|");
+    int** arr = new int*[13];
+    for(int i=0;i<13;i++){
+        arr[i] = new int[13]; 
+        for(int j=0;j<13;j++){
+            arr[i][j] = atoi(std::to_string(arry[i*13+j]).c_str());
+        }
+    }
+    return arr;
 }
 
 //发送登录或者观战信息
@@ -111,33 +136,57 @@ bool Info_SendAndRev::Send_start_and_watch_Info(int client_socket,int flag)
 }
 
 
-
-//接收信息
-bool Info_SendAndRev::Rev_info(int client_socket,char * recvbuffer)
-{
-    //信息的解包
-    char buffer[128]={0};
-    strcpy(buffer,recvbuffer);
-    //分离数组内容，验证是否合法加入
-    char *way = strtok(buffer, ",");
-    char *message = strtok(NULL,"\0");
-    cout<<way<<endl;
-    cout<<message<<endl;
-    //根据解包之后的协议做选择
-    /*void Get_NameAndPassword(char *recvbuffer)在服务器中的这个函数可以把字符串中的
-    符号去掉，然后输出由字符串隔开的一个个字符串
-    输或赢：object:xxx,result:win/lose
-    加入房间:way:join,object:xxx
-    或者更多
-    */
-   return true;
+//发送落子位置
+void Info_SendAndRev::Send_position(int client_socket,int x,int y,int color){
+    string position_message="way:down,local:("+to_string(x)+","+to_string(y)+"),color:"+to_string(color);
+    //发送
+    if(send(client_socket, position_message.c_str(), position_message.length(), 0)<0)
+    {
+        //错误处理
+        std::cout<<"发送失败"<<std::endl;
+    }
 }
 
+//接收落子信息
+int *Info_SendAndRev::Recv_position(int client_socket){
+    //接收
+    char recvbuffer[128];
+    if(recv(client_socket, recvbuffer, 128, 0)<0)
+    {
+        cout<< "接收失败"<<endl;
+    }
+
+    char delimiters[] = " ,:()"; // 分隔符可以是空格、逗号、问号和感叹号
+    char* token = std::strtok(recvbuffer, delimiters);
+    int *arr=new int[3];
+    int a=0;
+    while (token != nullptr) {
+        if(a==3)
+        {
+            arr[0] = stoi(std::to_string(*token).c_str())-'0';
+        }
+        if(a==4)
+        {
+            arr[1] = stoi(std::to_string(*token).c_str())-'0';
+        }
+        if(a==6)
+        {
+            arr[2] = stoi(std::to_string(*token).c_str())-'0';
+            break;
+        }
+        token = std::strtok(nullptr, delimiters);
+        a++;
+    }
+    return arr;
+}
 /*******************test*****************/
 // int main(){
 //     Info_SendAndRev info;
-//     int client_socket = info.INIT_SOCKET("192.168.13.64",9999);
-//     string recvbuffer =info.Send_NameAndPassword(client_socket,0,"victor","123456");
+//     int client_socket = info.INIT_SOCKET("192.168.13.64",9998);
+//     string recvbuffer =info.Send_NameAndPassword(client_socket,1,"victor","123456");
 //     cout << recvbuffer.c_str() << endl;
+//     int a[13][13]={0};
+//     info.Send_Checkerboard_Info(client_socket,a);
+//     info.Recv_position(client_socket);
 //     return 0;
 // }
