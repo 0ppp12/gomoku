@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-25 09:38:41
+ * @LastEditTime: 2023-09-25 15:04:24
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -201,6 +201,8 @@ int main(void)
                                     member_1  = member;
                                     cout<<"加入了黑棋玩家"<<endl;
                                     cout<<"该房间是遗老房间"<<endl;
+                                    char color_member[]="black";
+                                    send(evt[i].data.fd,color_member,sizeof(color_member),0);
                                     //创建线程？线程函数？
                                     //添加任务
                                     thread.add_task(pool1,Play_And_Communicate,nullptr);
@@ -218,6 +220,8 @@ int main(void)
                                     member_1  = member;
                                     cout<<"该房间是遗老房间"<<endl;
                                     cout<<"加入了白棋玩家"<<endl;
+                                    char color_member[]="wlite";
+                                    send(evt[i].data.fd,color_member,sizeof(color_member),0);
                                     //创建线程？线程函数？
                                     //添加任务
                                     thread.add_task(pool1,Play_And_Communicate,nullptr);
@@ -495,6 +499,7 @@ void* Play_And_Communicate(void *arg)
                 }
                 //数据处理
                 printf("recv:%s\n", recvbuffer);
+                send(player_2.sockfd,recvbuffer,sizeof(recvbuffer),0);
                 
                 //这里可以考虑在服务器进行逻辑判断输赢
                 //处理完成数据后，对另外一个客户端发送数据
@@ -526,6 +531,7 @@ void* Play_And_Communicate(void *arg)
                 }
                 //数据处理
                 printf("recv2:%s\n", recvbuffer);
+                send(player_1.sockfd,recvbuffer,sizeof(recvbuffer),0);
             }
             //退出
             else 
