@@ -1,14 +1,28 @@
 #include "player.h"
+#include "checkerboard.h"
 int Player::recvSendDropRequest(int serverSockfd){
+    Checkerboard b;
     char recvbuf[128];
     char sendbuf[128];
+    char colorname[128];
+    char opponentcolor;
     int x,y;
+    int winflag=0;
     if(this->color=='B'){
         memset(recvbuf,0,sizeof(recvbuf));
         read(serverSockfd,recvbuf,128);// 接收落子通知
         memset(sendbuf,0,sizeof(sendbuf));
-        printf("请输入棋子坐标(x,y)\n");
-        scanf("%d,%d",&x,&y);
+        while(1){
+            printf("请输入棋子坐标(x,y)\n");
+            scanf("%d,%d",&x,&y);
+            if(b.isDropLegal(x,y)){
+                b.gomoku[x][y]=this->color;
+                if(b.checkWin(x,y,this->color)){
+                    printf("我赢了\n");
+                }
+                break;
+            }
+        }b.gomoku_show();
         //将x,y转化为网络字节序
         x=htons(x);
         y=htons(y);
@@ -17,17 +31,39 @@ int Player::recvSendDropRequest(int serverSockfd){
     }
     while(1){
         memset(recvbuf,0,sizeof(recvbuf));
+        memset(colorname,0,sizeof(colorname));
         read(serverSockfd,recvbuf,38);//接收对手落子情况,(之所以设置为38是因为要联系读2次，读多了下面的read就没的读了)
-        sscanf(recvbuf,"{way:down,local:(%d,%d)",&x,&y);
+        sscanf(recvbuf,"{way:down,local:(%d,%d),color:%[^}]}",&x,&y,colorname);
+        if(strstr(colorname,"white")){
+            opponentcolor='W';
+        }
+        else if(strstr(colorname,"black")){
+            opponentcolor='B';
+        }
         //将x,y转化为本地字节序
         x=ntohs(x);
         y=ntohs(y);
-        printf("%d,%d\n",x,y);
+        // printf("%d,%d\n",x,y);
+        b.gomoku[x][y]=opponentcolor;//画对手棋子
+        if(b.checkWin(x,y,opponentcolor)){
+            printf("我输了\n");
+            break;
+        }b.gomoku_show();
         memset(recvbuf,0,sizeof(recvbuf));
         read(serverSockfd,recvbuf,128);//接收落子通知
         memset(sendbuf,0,sizeof(sendbuf));
-        printf("请输入棋子坐标(x,y)\n");
-        scanf("%d,%d",&x,&y);
+        while(1){
+            printf("请输入棋子坐标(x,y)\n");
+            scanf("%d,%d",&x,&y);
+            if(b.isDropLegal(x,y)){
+                b.gomoku[x][y]=this->color;
+                if(b.checkWin(x,y,this->color)){
+                    printf("我赢了\n");
+                    winflag=1;
+                }
+                break;
+            }
+        }b.gomoku_show();
         //将x,y转化为网络字节序
         x=htons(x);
         y=htons(y);
@@ -37,6 +73,7 @@ int Player::recvSendDropRequest(int serverSockfd){
             sprintf(sendbuf,"{way:down,local:(%d,%d),color:black}",x,y);
         }
         write(serverSockfd,sendbuf,strlen(sendbuf));//发送落子请求
+        if(winflag)break;//如果我赢了也结束
     }
 }
 int Player::sendGetColorRequest(int serverSockfd){
@@ -66,7 +103,7 @@ int Player::getServerSockfd(){
     memset(&seraddr,0,sizeof(seraddr));
     seraddr.sin_family=AF_INET;//地址族
     seraddr.sin_port=htons(PORT);//端口号
-    seraddr.sin_addr.s_addr=inet_addr("127.0.0.1");//ip地址
+    seraddr.sin_addr.s_addr=inet_addr(SERVERIP);//ip地址
     int ret=connect(sockfd,(struct sockaddr*)&seraddr,sizeof(seraddr));
     if(ret<0){
         perror("connect");

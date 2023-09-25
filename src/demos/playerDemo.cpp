@@ -1,7 +1,7 @@
 /* 
 g++ serverDemo.cpp -pthread&&./a.out
-g++ playerDemo.cpp player.cpp&&./a.out
-g++ playerDemo.cpp player.cpp&&./a.out
+g++ playerDemo.cpp checkerboard.cpp player.cpp&&./a.out
+g++ playerDemo.cpp checkerboard.cpp player.cpp&&./a.out
  */
 #include <iostream>
 #include "player.h"

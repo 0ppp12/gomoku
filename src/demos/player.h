@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include<cstring>
 #include<unistd.h>
-#include "Checkerboard.h"
+#define SERVERIP "127.0.0.1"
 #define PORT 1888
 using namespace std;
 class Player{
