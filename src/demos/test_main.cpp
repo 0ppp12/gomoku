@@ -1,6 +1,8 @@
 #include "Checkerboard.h"
 #include "player.h"
 
+
+
 int main(){
     //创建棋手类对象
     Player local_Player;

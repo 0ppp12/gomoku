@@ -15,6 +15,10 @@ public:
     void gomoku_show();
     //显示棋子
 
+    //创建触摸屏线程不断获取坐标
+    void touchscreen_pthread();
+
+    //
 
     // 弃用
 // private:    

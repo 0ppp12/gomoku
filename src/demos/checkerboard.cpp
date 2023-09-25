@@ -1,6 +1,7 @@
 #include "Checkerboard.h"
 #include <iostream>
 #include<vector>
+#include <thread>
 
 extern "C"
 {
@@ -93,7 +94,6 @@ int Checkerboard::checkWin(int x,int y,char color){
 	if(cou1>=4) return 1;// /5
 	return 0;//胜负未定
 }
-
 
 
 

@@ -1,7 +1,13 @@
 #include "player.h"
 #include "checkerboard.h"
+#include "touchscreen.h"
+
 int Player::recvSendDropRequest(int serverSockfd){
-    Checkerboard b;
+    Checkerboard b;//棋盘类对象
+    TsDevice& TS = TsDevice::TsInstance();
+    //创建触摸屏线程
+
+
     char recvbuf[128];
     char sendbuf[128];
     char colorname[128];
@@ -140,3 +146,8 @@ int Player::signup(){//注册
 int Player::signin(){//登陆
 
 };
+
+
+void ts_geting(){
+
+}
