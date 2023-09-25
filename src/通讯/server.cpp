@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-24 17:24:47
+ * @LastEditTime: 2023-09-25 09:38:41
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -41,7 +41,7 @@ int main(void)
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(9999);
+    addr.sin_port = htons(9998);
     addr.sin_addr.s_addr = INADDR_ANY;
     int ret =  bind(sockfd, (struct sockaddr*)(&addr),sizeof(addr));
     if(ret < 0)
@@ -335,9 +335,9 @@ Player  way_choose(char *recvbuffer,Player *buff,int scokfd)
                 if(strcmp(buff[i].password, password) == 0)
                 {
                     cout << "登录成功" << endl;
-                    // string message;
-                    // message="登录成功";
-                    // send(scokfd, message.c_str(), message.length(), 0);
+                    string message;
+                    message="登录成功";
+                    send(scokfd, message.c_str(), message.length(), 0);
                     return buff[i];
                 }
             }
@@ -375,6 +375,9 @@ Player  way_choose(char *recvbuffer,Player *buff,int scokfd)
                 cout<<"读取文件失败"<<endl;
             }
         }
+        string message;
+        message="注册成功";
+        send(scokfd, message.c_str(), message.length(), 0);
         cout<<"注册成功"<<endl;
         
     }
