@@ -147,7 +147,7 @@ int Player::signin(){//登陆
 
 };
 
-
+//触摸屏线程
 void ts_geting(){
 
 }

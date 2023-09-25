@@ -13,12 +13,9 @@ public:
     int isDropLegal(int x,int y);
     //显示棋盘
     void gomoku_show();
-    //显示棋子
 
-    //创建触摸屏线程不断获取坐标
-    void touchscreen_pthread();
-
-    //
+    //坐标转换
+    void turn_x_y(int *_x, int *_y);
 
     // 弃用
 // private:    
