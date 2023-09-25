@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include<cstring>
 #include<unistd.h>
+#include "Checkerboard.h"
 #define PORT 1888
 using namespace std;
 class Player{
@@ -12,6 +13,7 @@ class Player{
     char name[20];
     char color;
     int serverSockfd;
+    // Checkerboard checkerboard;//没必要，在游戏是创建一个实例就好
 
     int recvSendDropRequest(int serverSockfd);//收发落子请求（落子情况角落）
     int sendGetColorRequest(int serverSockfd);//发送获取颜色请求
