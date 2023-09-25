@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:33
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-25 15:17:57
+ * @LastEditTime: 2023-09-25 15:21:49
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\client.cpp
  * @Description: ???????????,??????`customMade`, ??koroFileHeader?????? ????????: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -94,7 +94,7 @@ bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket,char a[13][13])
 
 }
 
-//发送棋盘信息
+//发送登录或者观战信息
 bool Info_SendAndRev::Send_start_and_watch_Info(int client_socket,int flag)
 {
     char watch_message[]="watch:game";

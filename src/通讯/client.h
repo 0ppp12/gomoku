@@ -38,7 +38,7 @@ public:
     /*接收服务器反馈信息*/
     bool Rev_info(int client_socket,char * recvbuffer);
     /*发送登录或者观战信息*/
-    Send_start_and_watch_Info(int client_socket,int flag);
+    bool Send_start_and_watch_Info(int client_socket,int flag);
     
     std::string client_name;
     std::string client_password;
