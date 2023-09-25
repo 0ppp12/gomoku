@@ -57,23 +57,30 @@ int Player::recvSendDropRequest(int serverSockfd){
             scanf("%d,%d",&x,&y);
             if(b.isDropLegal(x,y)){
                 b.gomoku[x][y]=this->color;
-                if(b.checkWin(x,y,this->color)){
+                if(b.checkWin(x,y,this->color)){//{object:xxx,result:win/lose}
                     printf("我赢了\n");
                     winflag=1;
+                    /***************9月25日14:47修改***增加向服务器发送胜利信息************/
+                    sprintf(sendbuf,"{object:%s,result:win}",this->color);
+                    write(serverSockfd,sendbuf,strlen(sendbuf));//发送落子请求
+                    memset(sendbuf,0,sizeof(sendbuf));
                 }
                 break;
             }
         }b.gomoku_show();
-        //将x,y转化为网络字节序
-        x=htons(x);
-        y=htons(y);
-        if(this->color=='W'){
-            sprintf(sendbuf,"{way:down,local:(%d,%d),color:white}",x,y);
-        } else if(this->color=='B'){
-            sprintf(sendbuf,"{way:down,local:(%d,%d),color:black}",x,y);
+
+        if(winflag != 1){
+            //将x,y转化为网络字节序
+            x=htons(x);
+            y=htons(y);
+            if(this->color=='W'){
+                sprintf(sendbuf,"{way:down,local:(%d,%d),color:white}",x,y);
+            } else if(this->color=='B'){
+                sprintf(sendbuf,"{way:down,local:(%d,%d),color:black}",x,y);
+            }
+            write(serverSockfd,sendbuf,strlen(sendbuf));//发送落子请求  
         }
-        write(serverSockfd,sendbuf,strlen(sendbuf));//发送落子请求
-        if(winflag)break;//如果我赢了也结束
+        //if(winflag)break;//如果我赢了也结束
     }
 }
 int Player::sendGetColorRequest(int serverSockfd){
