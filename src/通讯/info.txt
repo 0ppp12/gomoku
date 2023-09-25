@@ -3,3 +3,6 @@ account:吴建霆|password:654321|score:0
 account:龙俊豪|password:111111|score:0
 account:victor|password:123456|score:0
 account:rrr|password:11|score:0
+account:victo|password:123456|score:0
+account:q|password:11|score:0
+account:t|password:2|score:0
