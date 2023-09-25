@@ -37,6 +37,9 @@ Checkerboard::Checkerboard(){
 }
 //落子合法判断：返回值：非0为合法、0不合法
 int Checkerboard::isDropLegal(int x,int y){
+
+	turn_x_y(&x,&y);//坐标转换
+
 	if(x<0||x>=N||y<0||y>=N){
 		printf("%d,%d落子位置非法，合法坐标范围为（0-12）\n",x,y);
 		return 0;
@@ -50,6 +53,9 @@ int Checkerboard::isDropLegal(int x,int y){
 
 int Checkerboard::checkWin(int x,int y,char color){
 	int i,j,cou1=0;
+
+	turn_x_y(&x,&y);//坐标转换
+
 	for(i=y+1;i<N;i++)//'*'落子位置正下方
 		if(gomoku[x][i]==color)
 			cou1++;
@@ -93,6 +99,18 @@ int Checkerboard::checkWin(int x,int y,char color){
 		else break;
 	if(cou1>=4) return 1;// /5
 	return 0;//胜负未定
+}
+
+
+
+
+/**************9月25日17:05更改***此函数用于将触摸屏坐标转换为棋盘数组中的坐标***********/
+void Checkerboard::turn_x_y(int *_x, int *_y){
+
+    *_x = (*_x-186)/34;
+    *_y = (*_y-26)/34;
+
+    std::cout << "(" << *_x << "," << *_x << ")" <<std::endl;
 }
 
 
