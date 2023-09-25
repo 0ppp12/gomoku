@@ -6,7 +6,7 @@
 using namespace std;
 
 //全局搜索
-COORDINATE AI::deepSearch(int chessboard[BOARD_SIZE][BOARD_SIZE],int playerChess, int aiChess,int n,int row,int col)
+COORDINATE AI::deepSearch(char chessboard[BOARD_SIZE][BOARD_SIZE],char playerChess, char aiChess,int n,int row,int col)
 {
 	COORDINATE  cor;//用于接受AI计算后返回的坐标
     
@@ -17,7 +17,7 @@ COORDINATE AI::deepSearch(int chessboard[BOARD_SIZE][BOARD_SIZE],int playerChess
     int score_max=0, score=0,score_min=10000000,score_2=0;
 	int m=0;
 	
-    int chessmapCopied[BOARD_SIZE][BOARD_SIZE] = { 0 };
+    char chessmapCopied[BOARD_SIZE][BOARD_SIZE] = { 0 };
 	
     ai.chessboard_copy(chessmapCopied, chessboard);
 	
@@ -114,7 +114,7 @@ COORDINATE AI::deepSearch(int chessboard[BOARD_SIZE][BOARD_SIZE],int playerChess
     return cor;
 }
 
-int AI::deepSecond(SCOREMAP sm, int chessmapCopied[BOARD_SIZE][BOARD_SIZE], int row, int col, int playerChess, int aiChess)
+int AI::deepSecond(SCOREMAP sm, char chessmapCopied[BOARD_SIZE][BOARD_SIZE], int row, int col, char playerChess, char aiChess)
 {
     int m = 0;
 	
@@ -123,7 +123,7 @@ int AI::deepSecond(SCOREMAP sm, int chessmapCopied[BOARD_SIZE][BOARD_SIZE], int 
     SCOREMAP second;
     second.next = new SCOREMAP;//第二次权值计算的评分表
     
-    int chessMap[BOARD_SIZE][BOARD_SIZE] = { 0 };
+    char chessMap[BOARD_SIZE][BOARD_SIZE] = { 0 };
     ai.chessboard_copy(chessMap, chessmapCopied); //再次复制AI用于试下子的棋盘
 	
     chessMap[row][col] = aiChess;//将AI目标子下到试用棋盘
@@ -154,7 +154,7 @@ int AI::deepSecond(SCOREMAP sm, int chessmapCopied[BOARD_SIZE][BOARD_SIZE], int 
 	return second.next->socreCur;
 }
 
-void AI::chessboard_copy(int chessboard_c[BOARD_SIZE][BOARD_SIZE],int chessboard[BOARD_SIZE][BOARD_SIZE])
+void AI::chessboard_copy(char chessboard_c[BOARD_SIZE][BOARD_SIZE],char chessboard[BOARD_SIZE][BOARD_SIZE])
 {	
 	//复制棋盘，用于试下，不破坏原有棋盘
 	for (int i = 0; i < BOARD_SIZE; i++) {
@@ -165,7 +165,7 @@ void AI::chessboard_copy(int chessboard_c[BOARD_SIZE][BOARD_SIZE],int chessboard
 }
 
 //清空权重表
-void AI::scoremapClear(int socremap[BOARD_SIZE][BOARD_SIZE])
+void AI::scoremapClear(char socremap[BOARD_SIZE][BOARD_SIZE])
 {
 	for (int row = 0; row < BOARD_SIZE; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
@@ -175,7 +175,7 @@ void AI::scoremapClear(int socremap[BOARD_SIZE][BOARD_SIZE])
 }
 
 //评分计算各个点的价值
-void AI::calculateScore(int chessboard[BOARD_SIZE][BOARD_SIZE], SCOREMAP & sm, int playerChess, int aiChess)
+void AI::calculateScore(char chessboard[BOARD_SIZE][BOARD_SIZE], SCOREMAP & sm, char playerChess, char aiChess)
 {
 	int personNum = 0; //玩家方（黑棋）多少个连续的棋子
 	int aiNum = 0; //系统方（白棋）连续有多少个连续的棋子
@@ -340,7 +340,7 @@ void AI::calculateScore(int chessboard[BOARD_SIZE][BOARD_SIZE], SCOREMAP & sm, i
 	}
 }
 
-void showmap(int map[13][13])
+void showmap(char map[13][13])
 {
     cout<<"\t";
     for (int i = 0; i < BOARD_SIZE; i++)
@@ -357,7 +357,7 @@ void showmap(int map[13][13])
     cout<<"-------------"<<endl;
 }
 
-COORDINATE AI::chessdownbyAI(int chessboard[BOARD_SIZE][BOARD_SIZE],int playerChess, int aiChess,int n,int row,int col)
+COORDINATE AI::chessdownbyAI(char chessboard[BOARD_SIZE][BOARD_SIZE],char playerChess, char aiChess,int n,int row,int col)
 {
     COORDINATE coordinate;
     srand(time(0));
@@ -378,7 +378,7 @@ int main(void)
 {
     int x = 0,y = 0;
     
-    int map[13][13] = { 0 };
+    char map[13][13] = { 0 };
 
     AI ai;
 
