@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:33
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-26 17:19:55
+ * @LastEditTime: 2023-09-25 15:21:49
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\client.cpp
  * @Description: ???????????,??????`customMade`, ??koroFileHeader?????? ????????: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -203,38 +203,6 @@ int *Info_SendAndRev::Recv_position(int client_socket){
     
 }
 /*******************test*****************/
-<<<<<<< HEAD
-int client_socket;
-void *thread_recv(void *arg)
-{
-    while(1)
-    {
-        char recvbuff[128];
-        recv(client_socket, recvbuff, 128, 0);
-        cout<<recvbuff<<endl;
-        memset(recvbuff,0,sizeof(recvbuff));
-    }
-}
-
-int main(){
-    Info_SendAndRev info;
-    client_socket = info.INIT_SOCKET("192.168.13.64",9996);
-    string recvbuffer =info.Send_NameAndPassword(client_socket,1,"victor","123456");
-    send(client_socket, "start:game", sizeof("start:game"), 0);
-    char recvbuff[128];
-    recv(client_socket, recvbuff, 128, 0);
-    cout<<recvbuff<<endl;
-    pthread_t tid;
-    pthread_create(&tid,NULL,thread_recv,NULL);
-    while(1){
-        string buffer;
-        cin>>buffer;
-        send(client_socket, buffer.c_str(), buffer.length(), 0);
-    }
-    
-    return 0;
-}
-=======
 // int main(){
 //     Info_SendAndRev info;
 //     int client_socket = info.INIT_SOCKET("192.168.13.64",9998);
@@ -259,4 +227,3 @@ int main(){
 //     cout<<a[0]<<endl;
 //     return 0;
 // }
->>>>>>> 8f0b705bb853eeb82794fd90d68b4a397c6ca22e
