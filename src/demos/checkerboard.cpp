@@ -113,7 +113,7 @@ void Checkerboard::turn_x_y(int *_x, int *_y){
     *_x = (*_x-186)/34;
     *_y = (*_y-26)/34;
 
-    std::cout << "(" << *_x << "," << *_x << ")" <<std::endl;
+    std::cout << "(" << *_x << "," << *_y << ")" <<std::endl;
 }
 
 
