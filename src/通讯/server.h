@@ -46,3 +46,4 @@ void Get_NameAndPassword(char *recvbuffer);
 void clearRoom(Room *room);
 int Decide_WatcherOrPlayer(char *recvbuffer);
 void send_message_to_all_clients(epoll_event evt[], int num_clients, char* message);
+int handle_room_player(int mum,int destory_flag,int player);

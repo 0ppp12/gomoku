@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-25 15:04:24
+ * @LastEditTime: 2023-09-26 11:32:34
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -41,7 +41,7 @@ int main(void)
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(9998);
+    addr.sin_port = htons(9996);
     addr.sin_addr.s_addr = INADDR_ANY;
     int ret =  bind(sockfd, (struct sockaddr*)(&addr),sizeof(addr));
     if(ret < 0)
@@ -155,6 +155,7 @@ int main(void)
                 }
                 else if(login_status[i]==1)
                 {
+                    //选择观战者还是对战者
                     cout<<"1"<<endl;
                     pw_sgin=Decide_WatcherOrPlayer(recvbuffer);
                     cout<<pw_sgin<<endl;
@@ -394,6 +395,7 @@ void* Play_And_Communicate(void *arg)
     Player player_1 ;
     Player player_2 ;
     int room_num;
+    int destory_flag =0;
     for(Room& member:rooms)
     {
         if(member.num==mum)
@@ -438,7 +440,7 @@ void* Play_And_Communicate(void *arg)
         perror("add error02");
     }
 
-    while (1)
+    while (!destory_flag)
     {
         //等待事件发生
         struct epoll_event evt[10];
@@ -498,6 +500,24 @@ void* Play_And_Communicate(void *arg)
                     }
                 }
                 //数据处理
+                char buffer_change[128]="Change room";
+                //下面让所有人知道有玩家退出房间
+                if (!strcmp(buffer_change,recvbuffer))
+                {
+                   //这里下面就进行换房间的操作,这里是黑棋想要换房间
+                    destory_flag=handle_room_player(mum,destory_flag,0);
+                    int eret = epoll_ctl(epfd_01, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                    if(eret<0)
+                    {
+                        perror("del error");
+                        break;
+                    }
+                    char buffer02[] = "black leave the room";
+                    //向所有人进行广播，某个玩家离开房间
+                    send_message_to_all_clients(evt,10,buffer02);
+                    break;
+
+                }
                 printf("recv:%s\n", recvbuffer);
                 send(player_2.sockfd,recvbuffer,sizeof(recvbuffer),0);
                 
@@ -528,6 +548,24 @@ void* Play_And_Communicate(void *arg)
                         }
                         
                     }
+                }
+                char buffer_change[128]="Change room";
+                //下一局游戏游戏照常进行就行，因此不需要做处理，只需要对player中的分数给进行修改即可
+                if (!strcmp(buffer_change,recvbuffer))
+                {
+                    //这里下面就进行换房间的操作,这里是黑棋想要换房间
+                    destory_flag=handle_room_player(mum,destory_flag,1);
+                    int eret = epoll_ctl(epfd_01, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                    if(eret<0)
+                    {
+                        perror("del error");
+                        break;
+                    }
+                    char buffer02[] = "white leave the room";
+                    //向所有人进行广播，某个玩家离开房间
+                    send_message_to_all_clients(evt,10,buffer02);
+                    break;
+
                 }
                 //数据处理
                 printf("recv2:%s\n", recvbuffer);
@@ -697,4 +735,24 @@ void send_message_to_all_clients(epoll_event evt[], int num_clients, char* messa
     { 
         send(evt[i].data.fd, message, strlen(message), 0);
     }
+}
+
+//房间内的玩家的退出处理函数
+int handle_room_player(int mum,int destory_flag,int player)
+{
+    for(Room& member:rooms)
+    {
+        if(member.num==mum)
+        {
+            if (member.sign!=0)
+            {
+                //拿到指定房间的特定信息
+                member.people[player].is_on = 0;
+                destory_flag = 1;
+                member.sign--;
+                break;
+            }
+        }
+    }
+    return destory_flag;
 }
