@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-26 19:00:08
+ * @LastEditTime: 2023-09-26 20:35:41
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -218,7 +218,13 @@ int main(void)
                                     send(evt[i].data.fd,color_member,sizeof(color_member),0);
                                     //创建线程？线程函数？
                                     //添加任务
-                                    thread.add_task(pool1,Play_And_Communicate,nullptr);
+                                    thread.add_task(pool1,Play_And_Communicate,(void*)&member.num);
+                                    int eret = epoll_ctl(epfd, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                                    if(eret<0)
+                                    {
+                                        perror("del error");
+                                        return -1;
+                                    }
                                     cout<<"该房间不可加入"<<endl;
                                     break;
                                 }
@@ -237,7 +243,13 @@ int main(void)
                                     send(evt[i].data.fd,color_member,sizeof(color_member),0);
                                     //创建线程？线程函数？
                                     //添加任务
-                                    thread.add_task(pool1,Play_And_Communicate,nullptr);
+                                    thread.add_task(pool1,Play_And_Communicate,(void*)&member.num);
+                                    int eret = epoll_ctl(epfd, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                                    if(eret<0)
+                                    {
+                                        perror("del error");
+                                        return -1;
+                                    }
                                     cout<<"该房间不可加入"<<endl;
                                     break;
                                 }
@@ -286,11 +298,13 @@ int main(void)
                 {
                     for (Room& member :rooms)
                     {
+                        cout<<"进入观战"<<endl;
                         if(member.num!=0 && member.wtach_sign<5 && member.sign==2)
                         {
-                            char buff[]="012345";
+                            char buff[]="12345";
                             int j=0;
                             string room_nums_str = to_string(member.num);
+                            cout<<"房间号"<<room_nums_str<<endl;
                             for(Player& play :member.watch_people)
                             {
                                 if(play.sockfd==0)
@@ -299,6 +313,13 @@ int main(void)
                                     play.sockfd = evt[i].data.fd;
                                     send(play.sockfd, &buff[j], 1, 0);
                                     send(play.sockfd,room_nums_str.c_str(),room_nums_str.length(),0);
+                                    cout<<"观战成功"<<endl;
+                                    int eret = epoll_ctl(epfd, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                                    if(eret<0)
+                                    {
+                                        perror("del error");
+                                        return -1;
+                                    }
                                     break;
                                 }
                                 j++;
@@ -306,7 +327,7 @@ int main(void)
                         }
                         break;
                     }
-                    cout<<"没有观战房间可以进入"<<endl;
+                    send(evt[i].data.fd,"没有观战房间可以进入", sizeof("没有观战房间可以进入"), 0);
                 }
             }
         }
@@ -489,23 +510,39 @@ void* Play_And_Communicate(void *arg)
             if(member.num==mum)
             {
                 //拿到指定房间的特定信息
-                for(Player& play :member.watch_people) 
-                if(play.sockfd!=0)
+                for(Player& play :member.watch_people)
                 {
-                    struct epoll_event event;
-                    event.events = EPOLLIN;
-                    event.data.fd = play.sockfd;
-                    
-                    cout<<"join22"<<endl;
-                    int eret = epoll_ctl(epfd_01, EPOLL_CTL_ADD, play.sockfd, &event);
-                    if(eret<0)
+                    cout<<"watch:"<<play.sockfd<<endl;
+                    if(play.sockfd!=0 && play.is_on==0)
                     {
-                        perror("add error");
+                        struct epoll_event event;
+                        event.events = EPOLLIN;
+                        event.data.fd = play.sockfd;
+                        for(int i=0;i<10;i++)
+                        {
+                            if(fd[i]==0)
+                            {
+                                fd[i]=play.sockfd;
+                                play.is_on=1;
+                                break;
+                            }
+                        }
+                        for(int i=0;i<10;i++)
+                        {
+                            cout<<fd[i]<<endl;
+                        }
+                        cout<<"join22"<<endl;
+                        int eret = epoll_ctl(epfd_01, EPOLL_CTL_ADD, play.sockfd, &event);
+                        if(eret<0)
+                        {
+                            perror("add error");
+                        }
                     }
                 }
             break;    
             }
         }
+
         //进行主游戏传输过程
         for (int i = 0; i < size; i++)
         {
@@ -565,7 +602,7 @@ void* Play_And_Communicate(void *arg)
 
                 }
                 printf("recv:%s\n", recvbuffer);
-                send(player_2.sockfd, recvbuffer, strlen(recvbuffer), 0);
+                send_message_to_all_clients(fd,10,recvbuffer);
                 // send_message_to_all_clients(fd,10,recvbuffer);
                 //这里可以考虑在服务器进行逻辑判断输赢
                 //处理完成数据后，对另外一个客户端发送数据
@@ -626,7 +663,7 @@ void* Play_And_Communicate(void *arg)
                 }
                 //数据处理
                 printf("recv2:%s\n", recvbuffer);
-                send(player_1.sockfd, recvbuffer, strlen(recvbuffer), 0);
+                send_message_to_all_clients(fd,10,recvbuffer);
                 // send_message_to_all_clients(fd,10,recvbuffer);
             }
             //退出
@@ -645,8 +682,9 @@ void* Play_And_Communicate(void *arg)
                     close(evt[i].data.fd);
                 }
                 //比对字符串
+                
                 char exit_message[]="watcher:out";
-                if(strcmp(exit_message,recvbuffer))
+                if(strcmp(exit_message,recvbuffer)==0)
                 {
                     for(Room& member:rooms)
                     {
@@ -655,14 +693,42 @@ void* Play_And_Communicate(void *arg)
                             for(Player& play :member.watch_people) 
                             if(play.sockfd==evt[i].data.fd)
                             {
+                                cout<<evt[i].data.fd<<endl;
+                                for(int a=0;a<10;a++)
+                                {
+                                    if(fd[a]==evt[i].data.fd)
+                                    {
+                                        cout<<fd[a]<<endl;
+                                        cout<<evt[i].data.fd<<endl;
+                                        fd[a]=0;
+                                        cout<<"1231"<<endl;
+                                        break;
+                                    }
+                                }
                                 play.sockfd=0;
+                                play.is_on=0;
+                                int eret = epoll_ctl(epfd_01, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
+                                if(eret<0)
+                                {
+                                    perror("del error");
+                                    break;
+                                }
+                                mutex1.lock();
+                                struct epoll_event event;
+                                event.events = EPOLLIN;
+                                event.data.fd = evt[i].data.fd;
+                                eret = epoll_ctl(epfd, EPOLL_CTL_ADD, evt[i].data.fd, &event);
+                                if(eret<0)
+                                {
+                                    perror("add error");
+                                }
+                                mutex1.unlock();
                             }
                             break;
                         }
                     }
-                     //关闭套接字
-                    close(evt[i].data.fd);
                 }
+
             }
         }
     }
