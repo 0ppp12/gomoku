@@ -1,3 +1,11 @@
+/*
+ * @Author: victor victor@example.com
+ * @Date: 2023-09-23 09:17:43
+ * @LastEditors: victor victor@example.com
+ * @LastEditTime: 2023-09-26 15:28:26
+ * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #pragma once 
 #include <cstdio>
 #include <cstring>
@@ -45,5 +53,5 @@ Player  way_choose(char *recvbuffer,Player *buff,int scokfd);
 void Get_NameAndPassword(char *recvbuffer);
 void clearRoom(Room *room);
 int Decide_WatcherOrPlayer(char *recvbuffer);
-void send_message_to_all_clients(epoll_event evt[], int num_clients, char* message);
+void send_message_to_all_clients(int sockfd[], int num_clients, char* message);
 int handle_room_player(int mum,int destory_flag,int player);

@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:33
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-25 15:21:49
+ * @LastEditTime: 2023-09-26 17:19:55
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\client.cpp
  * @Description: ???????????,??????`customMade`, ??koroFileHeader?????? ????????: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -180,13 +180,33 @@ int *Info_SendAndRev::Recv_position(int client_socket){
     return arr;
 }
 /*******************test*****************/
-// int main(){
-//     Info_SendAndRev info;
-//     int client_socket = info.INIT_SOCKET("192.168.13.64",9998);
-//     string recvbuffer =info.Send_NameAndPassword(client_socket,1,"victor","123456");
-//     cout << recvbuffer.c_str() << endl;
-//     int a[13][13]={0};
-//     info.Send_Checkerboard_Info(client_socket,a);
-//     info.Recv_position(client_socket);
-//     return 0;
-// }
+int client_socket;
+void *thread_recv(void *arg)
+{
+    while(1)
+    {
+        char recvbuff[128];
+        recv(client_socket, recvbuff, 128, 0);
+        cout<<recvbuff<<endl;
+        memset(recvbuff,0,sizeof(recvbuff));
+    }
+}
+
+int main(){
+    Info_SendAndRev info;
+    client_socket = info.INIT_SOCKET("192.168.13.64",9996);
+    string recvbuffer =info.Send_NameAndPassword(client_socket,1,"victor","123456");
+    send(client_socket, "start:game", sizeof("start:game"), 0);
+    char recvbuff[128];
+    recv(client_socket, recvbuff, 128, 0);
+    cout<<recvbuff<<endl;
+    pthread_t tid;
+    pthread_create(&tid,NULL,thread_recv,NULL);
+    while(1){
+        string buffer;
+        cin>>buffer;
+        send(client_socket, buffer.c_str(), buffer.length(), 0);
+    }
+    
+    return 0;
+}
