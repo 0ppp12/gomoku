@@ -117,6 +117,28 @@ void Checkerboard::turn_x_y(int *_x, int *_y){
 }
 
 
+void judge_x_y(int *_x, int *_y){
+			// 确定落子坐标
+	if (*_x % 36 > 19)
+	{
+		*_x = *_x - *_x % 36 + 36;
+	}
+	else
+	{
+		*_x = *_x - *_x % 36;
+	}
+
+	if (*_y % 36 > 19)
+	{
+		*_y = *_y - *_y % 36 + 36;
+	}
+	else
+	{
+		*_y = *_y - *_y % 36;
+	}
+}
+
+
 
 //发送输赢信息{object:xxx,result:win/lose}
 // int Checkerboard::Sendwin(){

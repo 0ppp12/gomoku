@@ -17,6 +17,9 @@ public:
     //坐标转换
     void turn_x_y(int *_x, int *_y);
 
+    //手指坐标判断
+    void judge_x_y(int *_x, int *_y);
+
     // 弃用
 // private:    
 //     std::string player_id;          //本机棋手身份   black  white  
