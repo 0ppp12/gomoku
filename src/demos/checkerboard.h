@@ -10,7 +10,7 @@ public:
     //胜负判断胜利返回1，未胜利返回0
     int checkWin(int x,int y,char color);
     //落子合法判断：返回值：0为合法、1和2为不合法
-    int isDropLegal(int x,int y);
+    int isDropLegal(int x,int y,char colour);
     //显示棋盘
     void gomoku_show();
 
