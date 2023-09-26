@@ -68,13 +68,29 @@ char * Info_SendAndRev::Send_NameAndPassword(int client_socket,int flag,string n
     }
     //接收
     static char recvbuffer[128];
+    memset(recvbuffer,0,128);
     if(recv(client_socket, recvbuffer, 128, 0)<0)
     {
         cout<< "接收失败"<<endl;
     }
     return recvbuffer;
 }
+//接收棋子类型
+int Info_SendAndRev::Recv_ChessType(int client_socket){
+    char recvbuffer[128];
+    if(recv(client_socket, recvbuffer, 128, 0)<0)
+    {
+        cout<< "接收失败"<<endl;
+    }
+    if(strncmp(recvbuffer,"black",5)==0){
+        return 2;
+    }
+    else if(strncmp(recvbuffer,"white",5)==0){
+        return 1;
+    }
+    return 0;
 
+}
 //发送棋盘信息
 bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket,int a[13][13])
 {
@@ -101,22 +117,26 @@ bool Info_SendAndRev::Send_Checkerboard_Info(int client_socket,int a[13][13])
 // 接收棋盘信息
 int **Info_SendAndRev::Recv_Checkerboard_Info(int client_socket){
     //接收
-    static char recvbuffer[128];
+    char recvbuffer[128];
     if(recv(client_socket, recvbuffer, 128, 0)<0)
     {
         cout<< "接收失败"<<endl;
     }
-    //解包
-    char *way = strtok(recvbuffer, "|");
-    char *arry = strtok(NULL, "|");
-    int** arr = new int*[13];
-    for(int i=0;i<13;i++){
-        arr[i] = new int[13]; 
-        for(int j=0;j<13;j++){
-            arr[i][j] = atoi(std::to_string(arry[i*13+j]).c_str());
+    if(strncmp(recvbuffer,"way:Checkerboard_Info",21)==0)
+    {
+        //解包
+        char *way = strtok(recvbuffer, "|");
+        char *arry = strtok(NULL, "|");
+        int** arr = new int*[13];
+        for(int i=0;i<13;i++){
+            arr[i] = new int[13]; 
+            for(int j=0;j<13;j++){
+                arr[i][j] = atoi(std::to_string(arry[i*13+j]).c_str())-'0';
+            }
         }
+        return arr;
     }
-    return arr;
+    return nullptr;
 }
 
 //发送登录或者观战信息
@@ -155,38 +175,55 @@ int *Info_SendAndRev::Recv_position(int client_socket){
     {
         cout<< "接收失败"<<endl;
     }
-
-    char delimiters[] = " ,:()"; // 分隔符可以是空格、逗号、问号和感叹号
-    char* token = std::strtok(recvbuffer, delimiters);
-    int *arr=new int[3];
-    int a=0;
-    while (token != nullptr) {
-        if(a==3)
-        {
-            arr[0] = stoi(std::to_string(*token).c_str())-'0';
+    if(strncmp(recvbuffer,"way:down",8)==0){
+        char delimiters[] = " ,:()"; // 分隔符可以是空格、逗号、问号和感叹号
+        char* token = std::strtok(recvbuffer, delimiters);
+        int *arr=new int[3];
+        int a=0;
+        while (token != nullptr) {
+            if(a==3)
+            {
+                arr[0] = stoi(std::to_string(*token).c_str())-'0';
+            }
+            if(a==4)
+            {
+                arr[1] = stoi(std::to_string(*token).c_str())-'0';
+            }
+            if(a==6)
+            {
+                arr[2] = stoi(std::to_string(*token).c_str())-'0';
+                break;
+            }
+            token = std::strtok(nullptr, delimiters);
+            a++;
         }
-        if(a==4)
-        {
-            arr[1] = stoi(std::to_string(*token).c_str())-'0';
-        }
-        if(a==6)
-        {
-            arr[2] = stoi(std::to_string(*token).c_str())-'0';
-            break;
-        }
-        token = std::strtok(nullptr, delimiters);
-        a++;
+        return arr;
     }
-    return arr;
+    return nullptr;
+    
 }
 /*******************test*****************/
 // int main(){
 //     Info_SendAndRev info;
 //     int client_socket = info.INIT_SOCKET("192.168.13.64",9998);
+
 //     string recvbuffer =info.Send_NameAndPassword(client_socket,1,"victor","123456");
 //     cout << recvbuffer.c_str() << endl;
+
+//     int a=info.Recv_ChessType(client_socket);
+//     cout<<a<<endl;
+
 //     int a[13][13]={0};
 //     info.Send_Checkerboard_Info(client_socket,a);
-//     info.Recv_position(client_socket);
+
+//     int **a=info.Recv_Checkerboard_Info(client_socket);
+//     for(int i=0;i<13;i++){
+//         for(int j=0;j<13;j++){
+//             cout<<a[i][j]<<" ";
+//         }
+//     }
+
+//     int *a=info.Recv_position(client_socket);
+//     cout<<a[0]<<endl;
 //     return 0;
 // }

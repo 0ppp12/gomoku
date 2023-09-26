@@ -1,10 +1,10 @@
 /*** 
  * @Author: PENG
  * @Date: 2023-09-22 15:45:02
- * @LastEditTime: 2023-09-25 20:10:12
+ * @LastEditTime: 2023-09-26 16:02:22
  * @LastEditors: PENG
  * @Description: 
- * @FilePath: \c++\c++ 阶段项目\Gobang\src\通讯\client.h
+ * @FilePath: \Gobang\src\通讯\client.h
  * @Copyright(c)
  */
 #pragma once 
@@ -35,6 +35,8 @@ public:
     /*发送账号密码，参数1为client_socket，参数2：0为注册1为登录，参数3为用户名，参数4为密码
     返回值为字符串"登录失败,账户或密码错误"或"账户已存在"*/
     char * Send_NameAndPassword(int client_socket,int flag,string name,string password);
+    /*接收棋子类型，返回值1为黑棋，2为白棋*/
+    int Recv_ChessType(int client_socket);
     /*发送整个棋盘信息到服务器,参数1为client_socket，参数2为棋盘信息*/
     bool Send_Checkerboard_Info(int client_socket,int a[13][13]);
     /*接收整个棋盘信息，参数1为client_socket，返回值为a[13][13]*/
