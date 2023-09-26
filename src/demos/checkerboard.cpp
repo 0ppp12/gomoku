@@ -35,8 +35,9 @@ Checkerboard::Checkerboard(){
 		}
 	}
 }
+/*****************************9月26日修改***新增参数 char color ********************************/
 //落子合法判断：返回值：非0为合法、0不合法
-int Checkerboard::isDropLegal(int x,int y){
+int Checkerboard::isDropLegal(int x,int y,char color){
 
 	turn_x_y(&x,&y);//坐标转换
 
@@ -44,10 +45,12 @@ int Checkerboard::isDropLegal(int x,int y){
 		printf("%d,%d落子位置非法，合法坐标范围为（0-12）\n",x,y);
 		return 0;
 	}
-	if(gomoku[x][y]!='_'){
+	if(gomoku[x][y] != '_'){
 		printf("%d,%d已被%c占\n",x,y,gomoku[x][y]);
 		return 0;
 	}
+
+	gomoku[x][y] = color;
 	return 1;
 }
 
