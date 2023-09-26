@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-26 11:32:34
+ * @LastEditTime: 2023-09-26 14:45:41
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -519,8 +519,7 @@ void* Play_And_Communicate(void *arg)
 
                 }
                 printf("recv:%s\n", recvbuffer);
-                send(player_2.sockfd,recvbuffer,sizeof(recvbuffer),0);
-                
+                send_message_to_all_clients(evt,10,recvbuffer);
                 //这里可以考虑在服务器进行逻辑判断输赢
                 //处理完成数据后，对另外一个客户端发送数据
             }
@@ -569,7 +568,7 @@ void* Play_And_Communicate(void *arg)
                 }
                 //数据处理
                 printf("recv2:%s\n", recvbuffer);
-                send(player_1.sockfd,recvbuffer,sizeof(recvbuffer),0);
+                send_message_to_all_clients(evt,10,recvbuffer);
             }
             //退出
             else 
