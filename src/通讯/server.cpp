@@ -2,7 +2,7 @@
  * @Author: victor victor@example.com
  * @Date: 2023-09-19 18:53:21
  * @LastEditors: victor victor@example.com
- * @LastEditTime: 2023-09-26 20:35:41
+ * @LastEditTime: 2023-09-26 21:56:02
  * @FilePath: \work\stage5\game-project\the-gobang-game-of-cc-md-fk\src\通讯\server.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -24,7 +24,7 @@ vector<Room> rooms;
 int sockfd;
 Room member_1;//全局数据转运数组
 int epfd;
-int main(void)
+int main(int argc, char* argv[])
 {
     Player player_buffer[50]; 
     thread_pool *pool1 = new thread_pool;//初始化结构体 
@@ -43,7 +43,7 @@ int main(void)
     //2.绑定
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(9996);
+    addr.sin_port = htons(stoi(argv[1]));
     addr.sin_addr.s_addr = INADDR_ANY;
     int ret =  bind(sockfd, (struct sockaddr*)(&addr),sizeof(addr));
     if(ret < 0)
@@ -131,8 +131,8 @@ int main(void)
             else//客户端来数据
             {
                 //读取客户端数据
-                char recvbuffer[128]={0};
-                int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
+                char recvbuffer[1024]={0};
+                int rsize = recv(evt[i].data.fd, recvbuffer, 1024, 0);
                 cout<<"socket"<<evt[i].data.fd<<endl;
                 if(rsize <= 0)
                 {
@@ -239,7 +239,7 @@ int main(void)
                                     member_1  = member;
                                     cout<<"该房间是遗老房间"<<endl;
                                     cout<<"加入了白棋玩家"<<endl;
-                                    char color_member[]="wlite";
+                                    char color_member[]="white";
                                     send(evt[i].data.fd,color_member,sizeof(color_member),0);
                                     //创建线程？线程函数？
                                     //添加任务
@@ -267,7 +267,7 @@ int main(void)
                                     //添加任务
                                     thread.add_task(pool1,Play_And_Communicate,(void*)&member.num);
                                     cout<<"该房间不可加入"<<endl;
-                                    char color_member[]="wlite";
+                                    char color_member[]="white";
                                     send(evt[i].data.fd,color_member,sizeof(color_member),0);
                                     int eret = epoll_ctl(epfd, EPOLL_CTL_DEL, evt[i].data.fd, &evt[i]);
                                     if(eret<0)
@@ -340,7 +340,7 @@ Player  way_choose(char *recvbuffer,Player *buff,int scokfd)
     Player emptyPlayer;
     memset(emptyPlayer.name,0,sizeof(emptyPlayer));
 
-    char buffer[128]={0};
+    char buffer[1024]={0};
     strcpy(buffer,recvbuffer);
     //分离数组内容，验证是否合法加入
     char *way = strtok(buffer, ",");
@@ -546,11 +546,11 @@ void* Play_And_Communicate(void *arg)
         //进行主游戏传输过程
         for (int i = 0; i < size; i++)
         {
-            char recvbuffer[128]={0};
+            char recvbuffer[1024]={0};
             //黑旗来消息
             if (evt[i].data.fd == player_1.sockfd)
             {
-                int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
+                int rsize = recv(evt[i].data.fd, recvbuffer, 1024, 0);
                 if(rsize <= 0)
                 {
                     //客户端掉线
@@ -561,6 +561,7 @@ void* Play_And_Communicate(void *arg)
                         break;
                     }
                     close(evt[i].data.fd);
+                    cout<<"33"<<endl;
                     for (auto it = rooms.begin(); it != rooms.end(); ++it) {
                         std::cout << "Room num = " << it->num << std::endl;
                         if (it->num==room_num)
@@ -573,7 +574,7 @@ void* Play_And_Communicate(void *arg)
                     }
                 }
                 //数据处理
-                char buffer_change[128]="Changeroom";
+                char buffer_change[1024]="Changeroom";
                 //下面让所有人知道有玩家退出房间
                 if (!strcmp(buffer_change,recvbuffer))
                 {
@@ -610,7 +611,7 @@ void* Play_And_Communicate(void *arg)
             else if(evt[i].data.fd == player_2.sockfd)//白棋来消息
             {
 
-                int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
+                int rsize = recv(evt[i].data.fd, recvbuffer, 1024, 0);
                 if(rsize <= 0)
                 {
                     //客户端掉线
@@ -621,6 +622,7 @@ void* Play_And_Communicate(void *arg)
                         break;
                     }
                     close(evt[i].data.fd);
+                    cout<<"33"<<endl;
                     for (auto it = rooms.begin(); it != rooms.end(); ++it) {
                         std::cout << "Room num = " << it->num << std::endl;
                         if (it->num==room_num)
@@ -633,7 +635,7 @@ void* Play_And_Communicate(void *arg)
                         
                     }
                 }
-                char buffer_change[128]="Changeroom";
+                char buffer_change[1024]="Changeroom";
                 //下一局游戏游戏照常进行就行，因此不需要做处理，只需要对player中的分数给进行修改即可
                 if (!strcmp(buffer_change,recvbuffer))
                 {
@@ -669,7 +671,7 @@ void* Play_And_Communicate(void *arg)
             //退出
             else 
             {
-                int rsize = recv(evt[i].data.fd, recvbuffer, 128, 0);
+                int rsize = recv(evt[i].data.fd, recvbuffer, 1024, 0);
                 if(rsize <= 0)
                 {
                     //客户端掉线
@@ -680,9 +682,9 @@ void* Play_And_Communicate(void *arg)
                         break;
                     }
                     close(evt[i].data.fd);
+                    cout<<"33"<<endl;
                 }
                 //比对字符串
-                
                 char exit_message[]="watcher:out";
                 if(strcmp(exit_message,recvbuffer)==0)
                 {
@@ -789,7 +791,7 @@ bool File_read(string filename,Player *buff)
     }
 
     //2.读文件
-    char buffer[128];
+    char buffer[1024];
     int a=0;
     while(in>>buffer){ 
         char delimiters[] = " ,|:"; // 分隔符可以是空格、逗号、问号和感叹号
