@@ -1,11 +1,10 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
-#include "AI.h"
-
+#include "../head/AI.h"
+#include<cstring>
 using namespace std;
 
-//全局搜索
 COORDINATE AI::deepSearch(char chessboard[BOARD_SIZE][BOARD_SIZE],char playerChess, char aiChess,int n,int row,int col)
 {
 	COORDINATE  cor;//用于接受AI计算后返回的坐标
@@ -346,7 +345,6 @@ void showmap(char map[13][13])
     for (int i = 0; i < BOARD_SIZE; i++)
         cout<<i<<"\t";
     cout<<endl;
-    
     for (int row = 0; row < BOARD_SIZE; row++)
     {   
         cout<<row<<"\t";
@@ -374,28 +372,29 @@ COORDINATE AI::chessdownbyAI(char chessboard[BOARD_SIZE][BOARD_SIZE],char player
 }
 
 
-int main(void)
-{
-    int x = 0,y = 0;
+// int main(void)
+// {
+//     int x = 0,y = 0;
     
-    char map[13][13] = { 0 };
+//     char map[13][13] = { 0 };
 
-    AI ai;
+//     AI ai;
 
-    COORDINATE cor;
+//     COORDINATE cor;
 
-    while (1)
-    {
+//     while (1)
+//     {
         
-        scanf("%d,%d", &x, &y);
-        map[x][y] = 1;
-        cor = ai.deepSearch(map, 1, -1, 0, x, y);
-        cout<<"*******"<<endl;
-        cout<<cor.row<<","<<cor.col<<endl;
-        map[cor.row][cor.col] = -1;
-        cout<<"*******"<<endl;
-        showmap(map);
-    }
+//         scanf("%d,%d", &x, &y);
+//         map[x][y] = 'b';
+//         cor = ai.deepSearch(map,'b', 'w', 0,x,y);
+//         //cor = ai.chessdownbyAI(map,'b', 'w', 0,x,y );
+//         cout<<"*******"<<endl;
+//         cout<<cor.row<<","<<cor.col<<endl;
+//         map[cor.row][cor.col] = 'w';
+//         cout<<"*******"<<endl;
+//         showmap(map);
+//     }
 
-    return 0;
-}
+//     return 0;
+// }

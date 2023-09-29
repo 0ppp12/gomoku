@@ -1,0 +1,11 @@
+rm Gobang&&make&&scp Gobang 192.168.45.222:&&scp Gobang 192.168.45.223:
+make&&scp Gobang 192.168.45.222:&&scp Gobang 192.168.45.223:
+g++ server.cpp thread_pool.cpp -pthread&&./a.out 9999
+./Gobang 192.168.45.34 9999
+./Gobang 192.168.45.34 9999
+rm Gobang&&make&&scp Gobang 192.168.13.228:
+rm Gobang&&make&&scp Gobang 192.168.22.2:
+scp image/*.png 192.168.13.228:/lzktemp
+scp image/white.png 192.168.22.2:
+make&&scp Gobang 192.168.22.2:
+./Gobang 192.168.13.64 9998
