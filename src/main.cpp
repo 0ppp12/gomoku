@@ -11,7 +11,7 @@ using namespace std;
 #include "../head/touchscreen.h"
 #include "../head/checkerboard.h"
 #include "../head/AI.h"
-
+#include<queue>
 extern "C"
 {
 #include <unistd.h>
@@ -436,9 +436,9 @@ int main(int argc,char const *argv[]){
     lv_obj_set_size(btn_look,200,100);
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
-    //lv_obj_center(btn_one);
     lv_obj_align(btn_look,LV_ALIGN_CENTER,0,-150);
-    //lv_obj_add_event_cb(btn_look,,LV_EVENT_ALL,NULL); //设置注册look
+    void mode_watch(lv_event_t*e);
+    lv_obj_add_event_cb(btn_look,mode_watch,LV_EVENT_ALL,NULL);
 
 
     /*设置单机标签*/
@@ -767,8 +767,6 @@ void register_funtion(lv_event_t * e){
         cout<<"给窗口login的容器添加隐藏属性,清除窗口register的隐藏属性"<<endl;
         lv_obj_add_flag(contanier_login,LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(contanier_register,LV_OBJ_FLAG_HIDDEN);
-
-
     }
 
 }
@@ -841,8 +839,6 @@ void register_funtion_deal(lv_event_t * e){
                 lv_obj_add_flag(contanier_register,LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
             }
-
-
         }
     }
 }
@@ -893,9 +889,9 @@ void mode_one_retract(pair<pair<int,int>,pair<int,int>> lately_pos){
 
     map1[lately_pos.second.first][lately_pos.second.second]=0;
     board.gomoku[lately_pos.second.first][lately_pos.second.second]='_';
-    
+
 }
-int isvalpos(int x,int y){//缩小触点fw
+int isvalpos(int x,int y){//缩小触点范围
     int x0=(x-166)/34;
     int y0=(y-30)/34;
     if(x>=166+x0*34+17-12&&x<=166+x0*34+17+12){
@@ -903,10 +899,62 @@ int isvalpos(int x,int y){//缩小触点fw
     }
     return 0;
 }
+void mode_watch(lv_event_t *e){//!需要3个开发板，待测试
+    lv_event_code_t code=lv_event_get_code(e);
+    if(code==LV_EVENT_CLICKED){
+        cout<<"watch"<<endl;
+        lv_obj_add_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(contanier_play,LV_OBJ_FLAG_HIDDEN);
+        
+        pthread_create(&touch,NULL,[](void *arg)->void*{
+
+            write(server_socket,"watch:game",strlen("watch:game"));//申请观战
+
+            char buf[N*N];//接收棋盘
+            memset(board.gomoku,'_',sizeof(board.gomoku));
+            queue<pair<int,int>> newPeices;
+            int x,y;
+            while(1){//接收观战数据
+                memset(buf,0,sizeof(buf));
+                read(server_socket,buf,N*N);
+                if('_'==buf[0]||'B'==buf[0]||'W'==buf[0]){
+                    for(int i=0;i<N*N;i++){
+                        if(board.gomoku[i/N][i%N]!=buf[i]){
+                            newPeices.push(make_pair(i/N,i%N));//收集新增棋子
+                            board.gomoku[i/N][i%N]=buf[i];
+                            // printf("push_back: %c\n",buf[i]);
+                        }
+                    }
+                    board.gomoku_show();
+                    while(!newPeices.empty()){//处理新增棋子
+                        // printf("已处理（在lcd画出）新棋子：%d,%d\n",newPeices.front().first,newPeices.front().second);
+                        x=newPeices.front().first;
+                        y=newPeices.front().second;
+                        if('B'==board.gomoku[x][y]){//1黑2白
+                            dis_key(x*34+166,y*34+30,"black");
+                            cout<<"黑子落子："<<x<<","<<y<<" black"<<endl;
+                            if(board.checkWin(x,y,'B')){
+                                printf("黑子赢了\n");
+                            }
+                        } else if('W'==board.gomoku[x][y]){
+                            dis_key(x*34+166,y*34+30,"white");
+                            cout<<"白子落子："<<x<<","<<y<<" white"<<endl;
+                            if(board.checkWin(x,y,'W')){
+                                printf("白子赢了\n");
+                            }
+                        }
+                        newPeices.pop();
+                    }
+                }
+            }
+
+            signal(SIGUSR1,sig_funtion);
+            },NULL);
+    }
+}
 void mode_one(lv_event_t *e){
     lv_event_code_t code=lv_event_get_code(e);
     if(code==LV_EVENT_CLICKED){
-
         cout<<"singel"<<endl;
         cout<<"给窗口mode的容器添加隐藏属性,清除窗口play的隐藏属性"<<endl;
         /*给窗口login的容器添加隐藏属性，清除窗口play的隐藏属性*/
@@ -929,11 +977,11 @@ void mode_one(lv_event_t *e){
                         read(ts_fd,&ts_event,sizeof(ts_event));
                         //分析获取到的输入设备的参数信息：类型、编码、数值
                         if(ts_event.type==EV_ABS&&ts_event.code==ABS_X){
-                            ts_x = ts_event.value*800/1024; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
+                            ts_x=ts_event.value*800/1024; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                             // ts_x=ts_event.value; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                         }
                         if(ts_event.type==EV_ABS&&ts_event.code==ABS_Y){
-                            ts_y = ts_event.value*480/600; //存储Y轴坐标，该句需要选择性修改，新版触摸屏必须转换	
+                            ts_y=ts_event.value*480/600; //存储Y轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                             // ts_y=ts_event.value; //存储Y轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                         }
                         //当用户的手指离开触摸屏，则把坐标返回

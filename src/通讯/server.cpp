@@ -25,6 +25,7 @@ int sockfd;
 Room member_1;//全局数据转运数组
 int epfd;
 #define BUFFERSIZE 128
+#define N 13
 int main(int argc,char* argv[]){
     Player player_buffer[50];
     thread_pool *pool1=new thread_pool;//初始化结构体 
@@ -119,7 +120,7 @@ int main(int argc,char* argv[]){
                 char recvbuffer[BUFFERSIZE]={0};
                 int rsize=recv(evt[i].data.fd,recvbuffer,BUFFERSIZE,0);
                 printf("recv:%s\n",recvbuffer);
-                cout<<"socket"<<evt[i].data.fd<<endl;
+                cout<<"123 socket(evt[i].data.fd)"<<evt[i].data.fd<<endl;
                 if(rsize<=0){
                     //客户端掉线
                     int eret=epoll_ctl(epfd,EPOLL_CTL_DEL,evt[i].data.fd,&evt[i]);
@@ -141,7 +142,7 @@ int main(int argc,char* argv[]){
                 } else if(login_status[i]==1){
                     //选择观战者还是对战者
                     pw_sgin=Decide_WatcherOrPlayer(recvbuffer);
-                    cout<<"Decide_WatcherOrPlayer: "<<pw_sgin<<endl;
+                    cout<<"Decide_WatcherOrPlayer(1对战（start:game） 2观战（watch:game）): "<<pw_sgin<<endl;
                 }
                 //对战
                 if(pw_sgin==1){
@@ -152,7 +153,6 @@ int main(int argc,char* argv[]){
                         m=f;
                         m.sockfd=evt[i].data.fd;
 
-                        //cout<<"socket"<<m.sockfd<<endl;
                         Room r;
                         r.sign=1;
                         r.people[0]=m;
@@ -164,7 +164,6 @@ int main(int argc,char* argv[]){
                             return -1;
                         }
                         send(evt[i].data.fd,color_member,sizeof(color_member),0);//向第一次游戏第一个加入房间的玩家发送身份
-                        //cout<<"sockett"<<rooms[0].people->sockfd<<endl;
                     } else{
                         std::cout<<"动态数组(房间)不为空"<<std::endl;
                         for(Room& member:rooms){//在大厅中找只有1人的房间
@@ -270,10 +269,9 @@ int main(int argc,char* argv[]){
                             cout<<"房间号"<<room_nums_str<<endl;
                             for(Player& play:member.watch_people){
                                 if(play.sockfd==0){
-                                    cout<<"22"<<endl;
                                     play.sockfd=evt[i].data.fd;
-                                    send(play.sockfd,&buff[j],1,0);
-                                    send(play.sockfd,room_nums_str.c_str(),room_nums_str.length(),0);
+                                    write(play.sockfd,&buff[j],1);
+                                    write(play.sockfd,room_nums_str.c_str(),room_nums_str.length());
                                     cout<<"观战成功"<<endl;
                                     int eret=epoll_ctl(epfd,EPOLL_CTL_DEL,evt[i].data.fd,&evt[i]);
                                     if(eret<0){
@@ -397,12 +395,10 @@ void* Play_And_Communicate(void *arg){
             break;
         }
     }
-    cout<<player_1.sockfd<<endl;
-    cout<<player_2.sockfd<<endl;
+    cout<<"player_1.sockfd:"<<player_1.sockfd<<endl;
+    cout<<"player_2.sockfd:"<<player_2.sockfd<<endl;
     fd[0]=player_1.sockfd;
     fd[1]=player_2.sockfd;
-    cout<<fd[0]<<endl;
-    cout<<fd[1]<<endl;
     //创建epoll实例
     int epfd_01=epoll_create(10);
     if(epfd_01<0){
@@ -435,7 +431,8 @@ void* Play_And_Communicate(void *arg){
         perror("add error02");
     }
 
-
+    char gomoku[N][N];//服务端棋盘
+    memset(gomoku,'_',sizeof(gomoku));
     while(!destory_flag){
         //等待事件发生
         struct epoll_event evt[10];
@@ -477,6 +474,7 @@ void* Play_And_Communicate(void *arg){
         printf("进行主游戏传输过程\n");//进行主游戏传输过程
         for(int i=0; i<size; i++){
             char recvbuffer[BUFFERSIZE]={0};
+            char watchbuf[N*N];//给观战玩家的数据
             // char player='b';
             if(/* player=='b' &&*/evt[i].data.fd==player_1.sockfd){//黑旗来消息
                 int rsize=recv(evt[i].data.fd,recvbuffer,BUFFERSIZE,0);
@@ -527,8 +525,31 @@ void* Play_And_Communicate(void *arg){
 
                 }
                 printf("recv:%s\n",recvbuffer);
-                write(player_2.sockfd,recvbuffer,strlen(recvbuffer));//!不能发给所有客户端，要排除自己
+                write(player_2.sockfd,recvbuffer,strlen(recvbuffer));//!不能发给所有客户端，要排除自己和对手
+                {//这里处理的是给观战玩家的数据
+                    int colorflag,x,y;
+                    sscanf(recvbuffer,"way:down,local:(%d,%d),color:%d",&y,&x,&colorflag);
+                    printf("解析接收到的数据：%d,%d  %d\n",y,x,colorflag);
+                    if(1==colorflag){
+                        gomoku[y][x]='B';
+                    }
+                    if(2==colorflag){
+                        gomoku[y][x]='W';
+                    }
+                    for(int i=0;i<N;i++){//在服务端这样处理后发给客户端
+                        for(int j=0;j<N;j++){
+                            watchbuf[N*i+j]=gomoku[i][j];
+                        }
+                    }
+                    for(int i=0; i<10; i++){
+                        if(fd[i]!=player_1.sockfd&&fd[i]!=player_2.sockfd&&fd[i]!=0){
+                            cout<<"发给："<<fd[i]<<endl;
+                            write(fd[i],watchbuf,N*N);
+                        }
+                    }
+                }
                 // send_message_to_all_clients(fd,10,recvbuffer);
+
                 //这里可以考虑在服务器进行逻辑判断输赢
                 //处理完成数据后，对另外一个客户端发送数据
                 // player='w';
@@ -552,7 +573,6 @@ void* Play_And_Communicate(void *arg){
                             it->people[1].is_on=0;
                             break;
                         }
-
                     }
                 }
                 char buffer_change[BUFFERSIZE]="Changeroom";
@@ -582,7 +602,29 @@ void* Play_And_Communicate(void *arg){
                 }
                 //数据处理
                 write(player_1.sockfd,recvbuffer,strlen(recvbuffer));
-                // send_message_to_all_clients(fd,10,recvbuffer);//!不能发给所有客户端，要排除自己
+                // send_message_to_all_clients(fd,10,recvbuffer);//!不能发给所有客户端，要排除自己和对手
+                {//这里处理的是给观战玩家的数据
+                    int colorflag,x,y;
+                    sscanf(recvbuffer,"way:down,local:(%d,%d),color:%d",&y,&x,&colorflag);
+                    printf("解析接收到的数据：%d,%d  %d\n",y,x,colorflag);
+                    if(1==colorflag){
+                        gomoku[y][x]='B';
+                    }
+                    if(2==colorflag){
+                        gomoku[y][x]='W';
+                    }
+                    for(int i=0;i<N;i++){//在服务端这样处理后发给客户端
+                        for(int j=0;j<N;j++){
+                            watchbuf[N*i+j]=gomoku[i][j];
+                        }
+                    }
+                    for(int i=0; i<10; i++){
+                        if(fd[i]!=player_1.sockfd&&fd[i]!=player_2.sockfd&&fd[i]!=0){
+                            cout<<"发给："<<fd[i]<<endl;
+                            write(fd[i],watchbuf,N*N);
+                        }
+                    }
+                }
                 // player='b';
             }
             //退出
@@ -745,14 +787,13 @@ void clearRoom(Room *room){
 
 //广播函数
 void send_message_to_all_clients(int *sockfd,int num_clients,char* message){
-    for(int i=0; i<num_clients; i++){
-        if(sockfd[i]!=0){
-            cout<<sockfd[i]<<endl;
-            send(sockfd[i],message,strlen(message),0);
-            cout<<"广播"<<endl;
-        }
-
-    }
+    // for(int i=0; i<num_clients; i++){
+    //     if(/* (sockfd[i]!=player_1.socket||sockfd[i]!=player_2.socket)&& */sockfd[i]!=0){
+    //         cout<<sockfd[i]<<endl;
+    //         send(sockfd[i],message,strlen(message),0);
+    //         cout<<"广播"<<endl;
+    //     }
+    // }
 }
 
 //房间内的玩家的退出处理函数
