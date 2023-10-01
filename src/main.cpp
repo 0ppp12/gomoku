@@ -12,6 +12,7 @@ using namespace std;
 #include "../head/checkerboard.h"
 #include "../head/AI.h"
 #include<queue>
+#include<vector>
 extern "C"
 {
 #include <unistd.h>
@@ -66,7 +67,7 @@ Checkerboard board;                //
 pthread_t touch;                  //创建获取触摸屏坐标线程
 
 void start_game(lv_event_t * e);        //按钮start 触发事件声明
-void exit_game(lv_event_t * e);         //按钮exit 触发事件声明
+void back(lv_event_t * e);         //按钮exit 触发事件声明
 void register_funtion(lv_event_t * e);  //按钮注册 触发事件声明
 void login_funtion(lv_event_t * e);     //按钮登陆 触发事件声明
 void register_funtion_deal(lv_event_t * e); //按钮“勾”，触发事件声明
@@ -75,6 +76,7 @@ void mode_more(lv_event_t *e);          //按钮联网多人模式 触发事件�
 void ta_event_cb(lv_event_t * e);       //文本点击，触发键盘输入函数声明
 void dis_key(int x,int y,const char* b_or_w,lv_obj_t * obj=contanier_play);
 void sig_funtion(int);                 //线程接收信号终结函数声明
+void regret(lv_event_t * e);
 TsDevice tsDevice;
 
 void get_xy(int &x,int &y);
@@ -195,7 +197,7 @@ int main(int argc,char const *argv[]){
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
     lv_obj_align(btn2,LV_ALIGN_CENTER,0,140);
-    lv_obj_add_event_cb(btn2,exit_game,LV_EVENT_ALL,(void *)"start"); //设置退出函数
+    lv_obj_add_event_cb(btn2,back,LV_EVENT_ALL,(void *)"start"); //设置退出函数
 
     /*创建退出标签*/
     lv_obj_t * back_label=lv_label_create(btn2);
@@ -204,13 +206,12 @@ int main(int argc,char const *argv[]){
     lv_obj_center(back_label);
     /*========================================================================================================*/
     /*与服务端进行连接*/
-    const char *IP_4=argv[1];
-    int Port=stoi(argv[2]);
-    do{
-        server_socket=info.INIT_SOCKET(IP_4,Port);
-    } while(server_socket==1);
-
-    cout<<"连接成功"<<endl;
+    // const char *IP_4=argv[1];
+    // int Port=stoi(argv[2]);
+    // do{
+    //     server_socket=info.INIT_SOCKET(IP_4,Port);
+    // } while(server_socket==1);
+    // cout<<"连接成功"<<endl;
 
     /*=========================================================================================================*/
     /*创建登陆界面容器*/
@@ -313,19 +314,19 @@ int main(int argc,char const *argv[]){
     lv_obj_center(login_label);
 
     /*创建返回按钮*/
-    lv_obj_t *btn_black_login=lv_btn_create(contanier_login);
-    lv_obj_add_style(btn_black_login,&style_pr,LV_STATE_PRESSED);
-    lv_obj_add_style(btn_black_login,&style_def,0);
-    lv_obj_add_style(btn_black_login,&style_border,0);
-    lv_obj_set_size(btn_black_login,100,50);
+    lv_obj_t *btn_back_login=lv_btn_create(contanier_login);
+    lv_obj_add_style(btn_back_login,&style_pr,LV_STATE_PRESSED);
+    lv_obj_add_style(btn_back_login,&style_def,0);
+    lv_obj_add_style(btn_back_login,&style_border,0);
+    lv_obj_set_size(btn_back_login,100,50);
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
-    lv_obj_align(btn_black_login,LV_ALIGN_TOP_LEFT,0,0);
-    lv_obj_add_event_cb(btn_black_login,exit_game,LV_EVENT_ALL,(void *)"login"); //设置登陆函数
+    lv_obj_align(btn_back_login,LV_ALIGN_TOP_LEFT,0,0);
+    lv_obj_add_event_cb(btn_back_login,back,LV_EVENT_ALL,(void *)"login"); //设置登陆函数
 
     /*创建返回标签*/
-    lv_obj_t * login_black=lv_label_create(btn_black_login);
-    lv_label_set_text(login_black,"Black" LV_SYMBOL_NEW_LINE);
+    lv_obj_t * login_black=lv_label_create(btn_back_login);
+    lv_label_set_text(login_black,"Back" LV_SYMBOL_NEW_LINE);
     lv_obj_add_style(login_black,&style_login_label,LV_STATE_DEFAULT);
     lv_obj_center(login_black);
 
@@ -395,19 +396,19 @@ int main(int argc,char const *argv[]){
     lv_obj_center(register_label_rg);
 
     /*创建返回按钮*/
-    lv_obj_t *btn_black_register=lv_btn_create(contanier_register);
-    lv_obj_add_style(btn_black_register,&style_pr,LV_STATE_PRESSED);
-    lv_obj_add_style(btn_black_register,&style_def,0);
-    lv_obj_add_style(btn_black_register,&style_border,0);
-    lv_obj_set_size(btn_black_register,100,50);
+    lv_obj_t *btn_back_register=lv_btn_create(contanier_register);
+    lv_obj_add_style(btn_back_register,&style_pr,LV_STATE_PRESSED);
+    lv_obj_add_style(btn_back_register,&style_def,0);
+    lv_obj_add_style(btn_back_register,&style_border,0);
+    lv_obj_set_size(btn_back_register,100,50);
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
-    lv_obj_align(btn_black_register,LV_ALIGN_TOP_LEFT,0,0);
-    lv_obj_add_event_cb(btn_black_register,exit_game,LV_EVENT_ALL,(void *)"register"); //设置登陆函数
+    lv_obj_align(btn_back_register,LV_ALIGN_TOP_LEFT,0,0);
+    lv_obj_add_event_cb(btn_back_register,back,LV_EVENT_ALL,(void *)"register"); //设置登陆函数
 
     /*创建返回标签*/
-    lv_obj_t * register_black=lv_label_create(btn_black_register);
-    lv_label_set_text(register_black,"Black" LV_SYMBOL_NEW_LINE);
+    lv_obj_t * register_black=lv_label_create(btn_back_register);
+    lv_label_set_text(register_black,"Back" LV_SYMBOL_NEW_LINE);
     lv_obj_add_style(register_black,&style_login_label,LV_STATE_DEFAULT);
     lv_obj_center(register_black);
 
@@ -486,19 +487,19 @@ int main(int argc,char const *argv[]){
     lv_obj_add_style(more,&style_start_label,LV_STATE_DEFAULT);
 
     /*创建返回按钮*/
-    lv_obj_t *btn_black_mode=lv_btn_create(contanier_mode);
-    lv_obj_add_style(btn_black_mode,&style_pr,LV_STATE_PRESSED);
-    lv_obj_add_style(btn_black_mode,&style_def,0);
-    lv_obj_add_style(btn_black_mode,&style_border,0);
-    lv_obj_set_size(btn_black_mode,100,50);
+    lv_obj_t *btn_back_mode=lv_btn_create(contanier_mode);
+    lv_obj_add_style(btn_back_mode,&style_pr,LV_STATE_PRESSED);
+    lv_obj_add_style(btn_back_mode,&style_def,0);
+    lv_obj_add_style(btn_back_mode,&style_border,0);
+    lv_obj_set_size(btn_back_mode,100,50);
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
-    lv_obj_align(btn_black_mode,LV_ALIGN_TOP_LEFT,0,0);
-    lv_obj_add_event_cb(btn_black_mode,exit_game,LV_EVENT_ALL,(void *)"mode"); //设置登陆函数
+    lv_obj_align(btn_back_mode,LV_ALIGN_TOP_LEFT,0,0);
+    lv_obj_add_event_cb(btn_back_mode,back,LV_EVENT_ALL,(void *)"mode"); //设置登陆函数
 
     /*创建返回标签*/
-    lv_obj_t * mode_black=lv_label_create(btn_black_mode);
-    lv_label_set_text(mode_black,"Black" LV_SYMBOL_NEW_LINE);
+    lv_obj_t * mode_black=lv_label_create(btn_back_mode);
+    lv_label_set_text(mode_black,"Back" LV_SYMBOL_NEW_LINE);
     lv_obj_add_style(mode_black,&style_login_label,LV_STATE_DEFAULT);
     lv_obj_center(mode_black);
     /*========================================================================================================*/
@@ -555,46 +556,45 @@ int main(int argc,char const *argv[]){
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
     lv_obj_align(btn_regret,LV_ALIGN_RIGHT_MID,0,150);
-    // void mode_more(lv_event_t *e);
-    // lv_obj_add_event_cb(btn_defeat,mode_more,LV_EVENT_ALL,NULL); //设置注册函数
+    // lv_obj_add_event_cb(btn_regret,regret,LV_EVENT_ALL,NULL); //不要绑定事件，会打断read阻塞，段错误
 
-    /*设置认输标签*/
+    /*设置悔棋标签*/
     lv_obj_t * regret=lv_label_create(btn_regret);
     lv_label_set_text(regret,"regret");
     lv_obj_center(regret);
     lv_obj_add_style(regret,&style_start_label,LV_STATE_DEFAULT);
 
-    /*创建退出按钮*/
-    lv_obj_t *btn_exit_play=lv_btn_create(contanier_play);
-    lv_obj_add_style(btn_exit_play,&style_pr,LV_STATE_PRESSED);
-    lv_obj_add_style(btn_exit_play,&style_def,0);
-    lv_obj_add_style(btn_exit_play,&style_border,0);
-    lv_obj_set_size(btn_exit_play,100,50);
-    lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
-    lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
-    lv_obj_align(btn_exit_play,LV_ALIGN_TOP_LEFT,0,0);
-    lv_obj_add_event_cb(btn_exit_play,exit_game,LV_EVENT_ALL,(void *)"exit"); //设置登陆函数
+    // /*创建退出按钮*/
+    // lv_obj_t *btn_exit_play=lv_btn_create(contanier_play);
+    // lv_obj_add_style(btn_exit_play,&style_pr,LV_STATE_PRESSED);
+    // lv_obj_add_style(btn_exit_play,&style_def,0);
+    // lv_obj_add_style(btn_exit_play,&style_border,0);
+    // lv_obj_set_size(btn_exit_play,100,50);
+    // lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
+    // lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
+    // lv_obj_align(btn_exit_play,LV_ALIGN_TOP_LEFT,0,0);
+    // lv_obj_add_event_cb(btn_exit_play,back,LV_EVENT_ALL,(void *)"exit"); //设置登陆函数
 
-    /*创建退出标签*/
-    lv_obj_t * play_exit=lv_label_create(btn_exit_play);
-    lv_label_set_text(play_exit,"Exit" LV_SYMBOL_CLOSE);
-    lv_obj_add_style(play_exit,&style_login_label,LV_STATE_DEFAULT);
-    lv_obj_center(play_exit);
+    // /*创建退出标签*/
+    // lv_obj_t * play_exit=lv_label_create(btn_exit_play);
+    // lv_label_set_text(play_exit,"Exit" LV_SYMBOL_CLOSE);
+    // lv_obj_add_style(play_exit,&style_login_label,LV_STATE_DEFAULT);
+    // lv_obj_center(play_exit);
 
     /*创建返回按钮*/
-    lv_obj_t *btn_black_play=lv_btn_create(contanier_play);
-    lv_obj_add_style(btn_black_play,&style_pr,LV_STATE_PRESSED);
-    lv_obj_add_style(btn_black_play,&style_def,0);
-    lv_obj_add_style(btn_black_play,&style_border,0);
-    lv_obj_set_size(btn_black_play,100,50);
+    lv_obj_t *btn_back_play=lv_btn_create(contanier_play);
+    lv_obj_add_style(btn_back_play,&style_pr,LV_STATE_PRESSED);
+    lv_obj_add_style(btn_back_play,&style_def,0);
+    lv_obj_add_style(btn_back_play,&style_border,0);
+    lv_obj_set_size(btn_back_play,100,50);
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
-    lv_obj_align(btn_black_play,LV_ALIGN_TOP_LEFT,0,80);
-    lv_obj_add_event_cb(btn_black_play,exit_game,LV_EVENT_ALL,(void *)"play"); //设置登陆函数
+    lv_obj_align(btn_back_play,LV_ALIGN_TOP_LEFT,0,80);
+    lv_obj_add_event_cb(btn_back_play,back,LV_EVENT_ALL,(void *)"play"); //设置登陆函数
 
     /*创建返回标签*/
-    lv_obj_t * play_black=lv_label_create(btn_black_play);
-    lv_label_set_text(play_black,"Black" LV_SYMBOL_NEW_LINE);
+    lv_obj_t * play_black=lv_label_create(btn_back_play);
+    lv_label_set_text(play_black,"Back" LV_SYMBOL_NEW_LINE);
     lv_obj_add_style(play_black,&style_login_label,LV_STATE_DEFAULT);
     lv_obj_center(play_black);
     /*========================================================================================================*/
@@ -654,7 +654,7 @@ int main(int argc,char const *argv[]){
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
     lv_obj_align(btn_Exit,LV_ALIGN_CENTER,0,110);
-    lv_obj_add_event_cb(btn_Exit,exit_game,LV_EVENT_ALL,(void *)"exit"); //设置登陆函数
+    lv_obj_add_event_cb(btn_Exit,back,LV_EVENT_ALL,(void *)"exit"); //设置登陆函数
 
     /*设置再来一局标签*/
     lv_obj_t * Exit_label=lv_label_create(btn_Exit);
@@ -692,8 +692,8 @@ uint32_t custom_tick_get(void){
     return time_ms;
 }
 
-/*退出函数*/
-void exit_game(lv_event_t * e){
+/*返回函数*/
+void back(lv_event_t * e){
     string cont_start="start";
     string cont_login="login";
     string cont_register="register";
@@ -707,17 +707,17 @@ void exit_game(lv_event_t * e){
             sleep(2);
             exit(0);
         } else if(btn==cont_login){
-            cout<<"blcak start"<<endl;
+            cout<<"back start"<<endl;
             // 给窗口login的容器重新添加隐藏属性，清除窗口start的隐藏属性
             lv_obj_add_flag(contanier_login,LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(contanier_start,LV_OBJ_FLAG_HIDDEN);
         } else if(btn==cont_register){
-            cout<<"blcak register"<<endl;
+            cout<<"back register"<<endl;
             // 给窗口register的容器重新添加隐藏属性，清除窗口login的隐藏属性
             lv_obj_add_flag(contanier_register,LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(contanier_login,LV_OBJ_FLAG_HIDDEN);
         } else if(btn==cont_mode){
-            cout<<"blcak login"<<endl;
+            cout<<"back login"<<endl;
             // 给窗口mode的容器重新添加隐藏属性，清除窗口login的隐藏属性
             lv_obj_add_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(contanier_login,LV_OBJ_FLAG_HIDDEN);
@@ -735,7 +735,7 @@ void exit_game(lv_event_t * e){
                 }
             }
 
-            cout<<"blcak mode"<<endl;
+            cout<<"black mode"<<endl;
             /* 给窗口play的容器重新添加隐藏属性，清除窗口mode的隐藏属性*/
             lv_obj_add_flag(contanier_play,LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
@@ -747,15 +747,12 @@ void exit_game(lv_event_t * e){
 /*开始函数*/
 void start_game(lv_event_t * e){
     lv_event_code_t code=lv_event_get_code(e);
-
     if(code==LV_EVENT_CLICKED){
         cout<<"start"<<endl;
         // 给窗口1的容器添加隐藏属性，清除窗口2的隐藏属性
         lv_obj_add_flag(contanier_start,LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(contanier_login,LV_OBJ_FLAG_HIDDEN);
-
     }
-
 }
 
 /*注册函数*/
@@ -774,7 +771,6 @@ void register_funtion(lv_event_t * e){
 /*登陆函数*/
 void login_funtion(lv_event_t * e){
     lv_event_code_t code=lv_event_get_code(e);
-
     if(code==LV_EVENT_CLICKED){
         string check; //接收返回的登陆检测信息
         user_name_check=lv_textarea_get_text(user_name);
@@ -808,10 +804,7 @@ void login_funtion(lv_event_t * e){
 /*注册界面确定函数*/
 void register_funtion_deal(lv_event_t * e){
     lv_event_code_t code=lv_event_get_code(e);
-
     if(code==LV_EVENT_CLICKED){
-
-
         user_name_check=lv_textarea_get_text(user_name_rg);
         cout<<"用户："<<user_name_check<<endl;
         password_check=lv_textarea_get_text(password_rg);
@@ -881,31 +874,13 @@ void ta_event_cb(lv_event_t * e){
         lv_indev_reset(NULL,ta);   /*To forget the last clicked object to make it focusable again*/
     }
 }
-
-char map1[N][N]={0};
-void mode_one_retract(pair<pair<int,int>,pair<int,int>> lately_pos){
-    map1[lately_pos.first.first][lately_pos.first.second]=0;
-    board.gomoku[lately_pos.first.first][lately_pos.first.second]='_';
-
-    map1[lately_pos.second.first][lately_pos.second.second]=0;
-    board.gomoku[lately_pos.second.first][lately_pos.second.second]='_';
-
-}
-int isvalpos(int x,int y){//缩小触点范围
-    int x0=(x-166)/34;
-    int y0=(y-30)/34;
-    if(x>=166+x0*34+17-12&&x<=166+x0*34+17+12){
-        return 1;
-    }
-    return 0;
-}
 void mode_watch(lv_event_t *e){//!需要3个开发板，待测试
     lv_event_code_t code=lv_event_get_code(e);
     if(code==LV_EVENT_CLICKED){
         cout<<"watch"<<endl;
         lv_obj_add_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(contanier_play,LV_OBJ_FLAG_HIDDEN);
-        
+
         pthread_create(&touch,NULL,[](void *arg)->void*{
 
             write(server_socket,"watch:game",strlen("watch:game"));//申请观战
@@ -931,13 +906,13 @@ void mode_watch(lv_event_t *e){//!需要3个开发板，待测试
                         x=newPeices.front().first;
                         y=newPeices.front().second;
                         if('B'==board.gomoku[x][y]){//1黑2白
-                            dis_key(x*34+166,y*34+30,"black");
+                            dis_key(x,y,"black");
                             cout<<"黑子落子："<<x<<","<<y<<" black"<<endl;
                             if(board.checkWin(x,y,'B')){
                                 printf("黑子赢了\n");
                             }
                         } else if('W'==board.gomoku[x][y]){
-                            dis_key(x*34+166,y*34+30,"white");
+                            dis_key(x,y,"white");
                             cout<<"白子落子："<<x<<","<<y<<" white"<<endl;
                             if(board.checkWin(x,y,'W')){
                                 printf("白子赢了\n");
@@ -952,6 +927,61 @@ void mode_watch(lv_event_t *e){//!需要3个开发板，待测试
             },NULL);
     }
 }
+int isvalpos(int x,int y){//缩小触点范围
+    int x0=(x-166)/34;
+    int y0=(y-30)/34;
+    if(x>=166+x0*34+17-12&&x<=166+x0*34+17+12){
+        return 1;
+    }
+    return 0;
+}
+char map1[N][N]={0};//ai棋盘
+vector<pair<int,int>> allPieces;
+vector<lv_obj_t*> allPieceImages;
+int regret_in_mode=1;
+/*悔棋函数*/
+// void regret(lv_event_t * e){
+//     lv_event_code_t code=lv_event_get_code(e);
+//     // string data=(char *)lv_event_get_user_data(e);
+//     // cout<<"data"<<endl;
+//     if(code==LV_EVENT_CLICKED){
+//         if(1==regret_in_mode){//单机模式无需同意直接回退
+//             void mode_one_retract();
+//             mode_one_retract();
+//         }
+//     }
+// }
+void*mode_one_retract(void* arg){
+    cout<<"悔棋"<<endl;
+    for(int i=0;i<2;i++){
+        map1[allPieces.back().first][allPieces.back().second]=0;//ai棋盘倒推
+        board.gomoku[allPieces.back().first][allPieces.back().second]='_';//玩家棋盘倒推
+        printf("allPieces.size:%d\n",allPieces.size());
+        printf("allPieceImages.size:%d\n",allPieceImages.size());
+
+        lv_obj_add_flag(allPieceImages.back(),LV_OBJ_FLAG_HIDDEN);//隐藏图片
+        // free(allPieceImages.back());
+        allPieceImages.pop_back();
+        allPieces.pop_back();
+    }
+    board.gomoku_show();
+}
+void dis_key(int x,int y,const char* b_or_w,lv_obj_t*obj){
+    printf("1\n");
+    lv_obj_t *dis_image=(lv_obj_t *)calloc(1,sizeof(lv_obj_t));
+    dis_image=lv_img_create(obj);
+    allPieceImages.push_back(dis_image);
+    lv_obj_set_pos(dis_image,166+x*36-17,6+y*36-17);   //棋盘（0，0），真实坐标166，6
+    // board.gomoku_show();
+    /*判断下棋黑白*/
+    if(b_or_w=="black"){
+        lv_img_set_src(dis_image,BLACK_KEY_PATH);
+    } else if(b_or_w=="white"){
+        lv_img_set_src(dis_image,WHITE_KEY_PATH);
+    }
+    board.gomoku_show();
+    printf("2\n");
+}
 void mode_one(lv_event_t *e){
     lv_event_code_t code=lv_event_get_code(e);
     if(code==LV_EVENT_CLICKED){
@@ -964,18 +994,14 @@ void mode_one(lv_event_t *e){
             char player='B';
             AI ai;
             COORDINATE cor;
-            map1[13][13]={0};
             TsDevice t2=TsDevice::TsInstance();
             struct input_event ts_event;
             int ts_fd=t2.ts_fd;
             int ts_x,ts_y,x,y;
-            void mode_one_retract(pair<pair<int,int>,pair<int,int>> lately_pos);
-            pair<pair<int,int>,pair<int,int>> lately_pos;
             while(1){
                 if(player=='B'){
                     while(1){
                         read(ts_fd,&ts_event,sizeof(ts_event));
-                        //分析获取到的输入设备的参数信息：类型、编码、数值
                         if(ts_event.type==EV_ABS&&ts_event.code==ABS_X){
                             ts_x=ts_event.value*800/1024; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                             // ts_x=ts_event.value; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
@@ -987,24 +1013,26 @@ void mode_one(lv_event_t *e){
                         //当用户的手指离开触摸屏，则把坐标返回
                         if(ts_event.type==EV_KEY&&ts_event.code==BTN_TOUCH&&ts_event.value==0){
                             printf("ts_x=%d,ts_y=%d\n",ts_x,ts_y);
-                            x=ts_x;
-                            y=ts_y;//先把触摸屏返回的大坐标转成小坐标
-                            x=(x-166)/34;
-                            y=(y-30)/34;
-                            if(board.isDropLegal(y,x)){
+                            if(360<=ts_x&&ts_x<798&&360<=ts_y&&ts_y<415){
+                                pthread_t tid;
+                                pthread_create(&tid,NULL,mode_one_retract,NULL);//!不能直接调用函数，要用线程，别人会段错误
+                            }
+                            x=(ts_x-166)/34;
+                            y=(ts_y-30)/34;
+                            if(0<=x&&x<N&&board.isDropLegal(x,y)){
                                 break;
                             }
                         }
                     }
+
                     int isvalpos(int x,int y);
                     if(isvalpos(ts_x,ts_y)){
                         /*转换x，y坐标*/
                         printf("wanjia:%d,%d\n",x,y);     //玩家下的小坐标在板子是x,y，  在棋盘的二位数组中是y,x
                         board.gomoku[y][x]='B';//图形棋盘  //二维数组棋总盘中的y,x   
                         map1[y][x]='B';//ai棋盘            //把玩家的棋子下到AI计算的棋盘上
-                        lately_pos.first=make_pair(y,x);
-                        dis_key(ts_x,ts_y,"black");//图形棋盘画子
-                        // board.gomoku_show();
+                        allPieces.push_back(make_pair(y,x));
+                        dis_key(x,y,"black");//图形棋盘画子
                         if(board.checkWin(y,x,'B')){
                             printf("黑子赢了\n");
                             break;
@@ -1014,14 +1042,12 @@ void mode_one(lv_event_t *e){
                 }
                 // sleep(1);
                 else if(player=='W'){
+                    printf("ai: %d,%d\n",cor.row,cor.col);
                     cor=ai.deepSearch(map1,'B','W',0,y,x);//ai思考  //玩家在板子下的是x,y  在二维数组下的是y,x
                     board.gomoku[cor.row][cor.col]='W';
                     map1[cor.row][cor.col]='W';
-                    lately_pos.second=make_pair(cor.row,cor.col);
-                    ts_x=cor.col*34+166;
-                    ts_y=cor.row*34+30;
-                    printf("ai:%d,%d\n",cor.row,cor.col);
-                    dis_key(ts_x,ts_y,"white");
+                    allPieces.push_back(make_pair(cor.row,cor.col));
+                    dis_key(cor.col,cor.row,"white");
                     // board.gomoku_show();
                     if(board.checkWin(cor.row,cor.col,'W')){
                         printf("白子赢了\n");
@@ -1041,6 +1067,7 @@ void mode_one(lv_event_t *e){
 /*接收信号结束线程*/
 void sig_funtion(int){
     pthread_exit(0);
+
 }
 
 void mode_more(lv_event_t *e){
@@ -1076,11 +1103,10 @@ void mode_more(lv_event_t *e){
                     printf("tsxy:%d,%d\n",x,y);
                     x=(x-166)/34;
                     y=(y-30)/34;
-                    if(board.isDropLegal(y,x,'B')){
-                        info.Send_position(server_socket,y,x,1);
+                    if(board.isDropLegal(x,y,'B')){
+                        board.gomoku[x][y]='B';
+                        info.Send_position(server_socket,x,y,1);
                         printf("我（黑）方落子%d,%d\n",x,y);
-                        x=x*34+166;
-                        y=y*34+30;
                         dis_key(x,y,"black");
                         break;
                     }
@@ -1097,60 +1123,49 @@ void mode_more(lv_event_t *e){
                 read(server_socket,recvbuf,128);
                 int colorflag;
                 sscanf(recvbuf,"way:down,local:(%d,%d),color:%d",&y,&x,&colorflag);
-                printf("解析接收到的数据：%d,%d  %d\n",y,x,colorflag);
+                printf("解析接收到的数据：%d,%d  %d\n",x,y,colorflag);
                 if(colorflag==1){//1黑2白
-                    if(board.isDropLegal(y,x,'B'));
+                    board.gomoku[x][y]='B';
                     cout<<"对手落子："<<x<<","<<y<<" black"<<endl;
-                    if(board.checkWin(y,x,'B')){
+                    if(board.checkWin(x,y,'B')){
                         printf("对方赢了\n");
                         end=1;
                     }
-                    x=x*34+166;
-                    y=y*34+30;
                     dis_key(x,y,"black");
-                    // board.gomoku[y][x]='B';
                 } else if(colorflag==2){
-                    if(board.isDropLegal(y,x,'W'));
+                    board.gomoku[x][y]='W';
                     cout<<"对手落子："<<x<<","<<y<<" white"<<endl;
                     if(board.checkWin(y,x,'W')){
                         printf("对方赢了\n");
                         end=1;
                     }
-                    x=x*34+166;
-                    y=y*34+30;
                     dis_key(x,y,"white");
-                    // board.gomoku[y][x]='W';
                 }
-
 
                 /*我方落子*/
                 while(1){//发送落子
                     get_xy(x,y);
                     x=(x-166)/34;
                     y=(y-30)/34;
-                    if(board.isDropLegal(y,x,color)){
+                    if(board.isDropLegal(x,y,color)){
                         if(color=='B'){
                             info.Send_position(server_socket,y,x,1);
-                            printf("我方落子：%d,%d white\n",x,y);
+                            board.gomoku[y][x]='B';
+                            printf("我方落子：%d,%d black\n",x,y);
                             if(board.checkWin(y,x,color)){
                                 printf("我赢了\n");
                                 end=1;
                             }
-                            x=x*34+166;
-                            y=y*34+30;
                             dis_key(x,y,"black");
-                            // board.gomoku[y][x]='B';
                         } else if(color=='W'){
                             info.Send_position(server_socket,y,x,2);
+                            board.gomoku[y][x]='W';
                             printf("我方落子：%d,%d white\n",x,y);
                             if(board.checkWin(y,x,color)){
                                 printf("我赢了\n");
                                 end=1;
                             }
-                            x=x*34+166;
-                            y=y*34+30;
                             dis_key(x,y,"white");
-                            // board.gomoku[y][x]='W';
                         }
                         break;
                     }
@@ -1165,23 +1180,6 @@ void mode_more(lv_event_t *e){
             NULL
         );
         pthread_detach(touch);
-    }
-}
-
-void dis_key(int x,int y,const char* b_or_w,lv_obj_t*obj){
-    lv_obj_t *dis_image=lv_img_create(obj);
-    /*转换x，y坐标*/
-    x=(x-166)/34;
-    y=(y-30)/34;
-    cout<<"("<<x<<","<<y<<")"<<endl;
-    lv_obj_set_pos(dis_image,166+x*36-17,6+y*36-17);   //棋盘（0，0），真实坐标166，6
-    board.gomoku_show();
-
-    /*判断下棋黑白*/
-    if(b_or_w=="black"){
-        lv_img_set_src(dis_image,BLACK_KEY_PATH);
-    } else if(b_or_w=="white"){
-        lv_img_set_src(dis_image,WHITE_KEY_PATH);
     }
 }
 
