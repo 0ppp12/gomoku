@@ -65,6 +65,7 @@ TsDevice dev;                      //创建屏幕点击类对象
 Checkerboard board;                //
 
 pthread_t touch;                  //创建获取触摸屏坐标线程
+pthread_t mode_more_tid;
 
 void start_game(lv_event_t * e);        //按钮start 触发事件声明
 void back(lv_event_t * e);         //按钮exit 触发事件声明
@@ -72,13 +73,12 @@ void register_funtion(lv_event_t * e);  //按钮注册 触发事件声明
 void login_funtion(lv_event_t * e);     //按钮登陆 触发事件声明
 void register_funtion_deal(lv_event_t * e); //按钮“勾”，触发事件声明
 void mode_one(lv_event_t *e);           //按钮单机模式 触发事件声明
-void mode_more(lv_event_t *e);          //按钮联网多人模式 触发事件声明
+void*mode_more(void*arg);          //按钮联网多人模式 触发事件声明
+void mode_more_pthread(lv_event_t *e);
 void ta_event_cb(lv_event_t * e);       //文本点击，触发键盘输入函数声明
 void dis_key(int x,int y,const char* b_or_w,lv_obj_t * obj=contanier_play);
 void sig_funtion(int);                 //线程接收信号终结函数声明
 void regret(lv_event_t * e);
-TsDevice tsDevice;
-
 void get_xy(int &x,int &y);
 
 int main(int argc,char const *argv[]){
@@ -204,15 +204,6 @@ int main(int argc,char const *argv[]){
     lv_label_set_text(back_label,"EXIT " LV_SYMBOL_CLOSE);
     lv_obj_add_style(back_label,&style_start_label,LV_STATE_DEFAULT);
     lv_obj_center(back_label);
-    /*========================================================================================================*/
-    /*与服务端进行连接*/
-    // const char *IP_4=argv[1];
-    // int Port=stoi(argv[2]);
-    // do{
-    //     server_socket=info.INIT_SOCKET(IP_4,Port);
-    // } while(server_socket==1);
-    // cout<<"连接成功"<<endl;
-
     /*=========================================================================================================*/
     /*创建登陆界面容器*/
     contanier_login=lv_obj_create(lv_scr_act());       //基于屏幕创建一个和屏幕大小一样的容器contanier_6818
@@ -459,7 +450,7 @@ int main(int argc,char const *argv[]){
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
     //lv_obj_center(btn_one);
     lv_obj_align(btn_one,LV_ALIGN_CENTER,0,0);
-    lv_obj_add_event_cb(btn_one,mode_one,LV_EVENT_ALL,NULL); //设置注册函数
+    lv_obj_add_event_cb(btn_one,mode_one,LV_EVENT_ALL,NULL); //设置函数
 
     /*设置单机标签*/
     lv_obj_t * one=lv_label_create(btn_one);
@@ -478,7 +469,7 @@ int main(int argc,char const *argv[]){
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
     lv_obj_align(btn_more,LV_ALIGN_CENTER,0,150);
-    lv_obj_add_event_cb(btn_more,mode_more,LV_EVENT_ALL,NULL); //设置注册函数
+    lv_obj_add_event_cb(btn_more,mode_more_pthread,LV_EVENT_ALL,NULL); //设置函数
 
     /*设置多人标签*/
     lv_obj_t * more=lv_label_create(btn_more);
@@ -538,8 +529,8 @@ int main(int argc,char const *argv[]){
     lv_style_set_bg_color(&style_pr,lv_palette_darken(LV_PALETTE_DEEP_ORANGE,2));
     lv_style_set_bg_color(&style_def,lv_palette_main(LV_PALETTE_ORANGE));
     lv_obj_align(btn_defeat,LV_ALIGN_RIGHT_MID,0,50);
-    // void mode_more(lv_event_t *e);
-    // lv_obj_add_event_cb(btn_defeat,mode_more,LV_EVENT_ALL,NULL); //设置注册函数
+    // void defeat(lv_event_t *e);
+    // lv_obj_add_event_cb(btn_defeat,defeat,LV_EVENT_ALL,NULL); //设置注册函数
 
     /*设置认输标签*/
     lv_obj_t * defeat=lv_label_create(btn_defeat);
@@ -661,10 +652,15 @@ int main(int argc,char const *argv[]){
     lv_label_set_text(Exit_label,"Exit" LV_SYMBOL_NEW_LINE);  //Substitution：替代, 取代, 替换, 代换, 置换, 代用
     lv_obj_center(Exit_label);
     lv_obj_add_style(Exit_label,&style_start_label,LV_STATE_DEFAULT);
-
-
     /*========================================================================================================*/
-
+    /*与服务端进行连接*/
+    const char *IP_4=argv[1];
+    int Port=stoi(argv[2]);
+    do{
+        server_socket=info.INIT_SOCKET(IP_4,Port);
+    } while(server_socket==1);
+    cout<<"连接成功"<<endl;
+    /*========================================================================================================*/
     /*回调处理按键事件*/
     while(1){
         lv_timer_handler();
@@ -674,23 +670,6 @@ int main(int argc,char const *argv[]){
     return 0;
 }
 
-/*Set in lv_conf.h as `LV_TICK_CUSTOM_SYS_TIME_EXPR`*/
-uint32_t custom_tick_get(void){
-    static uint64_t start_ms=0;
-    if(start_ms==0){
-        struct timeval tv_start;
-        gettimeofday(&tv_start,NULL);
-        start_ms=(tv_start.tv_sec*1000000+tv_start.tv_usec)/1000;
-    }
-
-    struct timeval tv_now;
-    gettimeofday(&tv_now,NULL);
-    uint64_t now_ms;
-    now_ms=(tv_now.tv_sec*1000000+tv_now.tv_usec)/1000;
-
-    uint32_t time_ms=now_ms-start_ms;
-    return time_ms;
-}
 
 /*返回函数*/
 void back(lv_event_t * e){
@@ -938,49 +917,17 @@ int isvalpos(int x,int y){//缩小触点范围
 char map1[N][N]={0};//ai棋盘
 vector<pair<int,int>> allPieces;
 vector<lv_obj_t*> allPieceImages;
-int regret_in_mode=1;
-/*悔棋函数*/
-// void regret(lv_event_t * e){
-//     lv_event_code_t code=lv_event_get_code(e);
-//     // string data=(char *)lv_event_get_user_data(e);
-//     // cout<<"data"<<endl;
-//     if(code==LV_EVENT_CLICKED){
-//         if(1==regret_in_mode){//单机模式无需同意直接回退
-//             void mode_one_retract();
-//             mode_one_retract();
-//         }
-//     }
-// }
-void*mode_one_retract(void* arg){
-    cout<<"悔棋"<<endl;
-    for(int i=0;i<2;i++){
-        map1[allPieces.back().first][allPieces.back().second]=0;//ai棋盘倒推
-        board.gomoku[allPieces.back().first][allPieces.back().second]='_';//玩家棋盘倒推
-        printf("allPieces.size:%d\n",allPieces.size());
-        printf("allPieceImages.size:%d\n",allPieceImages.size());
-
-        lv_obj_add_flag(allPieceImages.back(),LV_OBJ_FLAG_HIDDEN);//隐藏图片
-        // free(allPieceImages.back());
-        allPieceImages.pop_back();
-        allPieces.pop_back();
-    }
-    board.gomoku_show();
-}
 void dis_key(int x,int y,const char* b_or_w,lv_obj_t*obj){
-    printf("1\n");
     lv_obj_t *dis_image=(lv_obj_t *)calloc(1,sizeof(lv_obj_t));
     dis_image=lv_img_create(obj);
     allPieceImages.push_back(dis_image);
     lv_obj_set_pos(dis_image,166+x*36-17,6+y*36-17);   //棋盘（0，0），真实坐标166，6
-    // board.gomoku_show();
     /*判断下棋黑白*/
     if(b_or_w=="black"){
         lv_img_set_src(dis_image,BLACK_KEY_PATH);
     } else if(b_or_w=="white"){
         lv_img_set_src(dis_image,WHITE_KEY_PATH);
     }
-    board.gomoku_show();
-    printf("2\n");
 }
 void mode_one(lv_event_t *e){
     lv_event_code_t code=lv_event_get_code(e);
@@ -1015,7 +962,21 @@ void mode_one(lv_event_t *e){
                             printf("ts_x=%d,ts_y=%d\n",ts_x,ts_y);
                             if(360<=ts_x&&ts_x<798&&360<=ts_y&&ts_y<415){
                                 pthread_t tid;
-                                pthread_create(&tid,NULL,mode_one_retract,NULL);//!不能直接调用函数，要用线程，别人会段错误
+                                pthread_create(&tid,NULL,[](void *arg)->void*{
+                                    cout<<"悔棋"<<endl;
+                                    for(int i=0;i<2;i++){
+                                        map1[allPieces.back().first][allPieces.back().second]=0;//ai棋盘倒推
+                                        board.gomoku[allPieces.back().first][allPieces.back().second]='_';//玩家棋盘倒推
+                                        // printf("allPieces.size:%d\n",allPieces.size());
+                                        // printf("allPieceImages.size:%d\n",allPieceImages.size());
+
+                                        lv_obj_add_flag(allPieceImages.back(),LV_OBJ_FLAG_HIDDEN);//隐藏图片
+                                        // free(allPieceImages.back());
+                                        allPieceImages.pop_back();
+                                        allPieces.pop_back();
+                                    }
+                                    board.gomoku_show();
+                                    },NULL);//!不能直接调用函数，要用线程，别人会段错误
                             }
                             x=(ts_x-166)/34;
                             y=(ts_y-30)/34;
@@ -1028,12 +989,12 @@ void mode_one(lv_event_t *e){
                     int isvalpos(int x,int y);
                     if(isvalpos(ts_x,ts_y)){
                         /*转换x，y坐标*/
-                        printf("wanjia:%d,%d\n",x,y);     //玩家下的小坐标在板子是x,y，  在棋盘的二位数组中是y,x
-                        board.gomoku[y][x]='B';//图形棋盘  //二维数组棋总盘中的y,x   
+                        printf("wanjia:%d,%d\n",x,y);     //玩家下的小坐标在板子是x,y，  在棋盘的二位数组中是x,y
+                        board.gomoku[y][x]='B';//图形棋盘  
                         map1[y][x]='B';//ai棋盘            //把玩家的棋子下到AI计算的棋盘上
-                        allPieces.push_back(make_pair(y,x));
+                        allPieces.push_back(make_pair(x,y));
                         dis_key(x,y,"black");//图形棋盘画子
-                        if(board.checkWin(y,x,'B')){
+                        if(board.checkWin(x,y,'B')){
                             printf("黑子赢了\n");
                             break;
                         }
@@ -1043,7 +1004,7 @@ void mode_one(lv_event_t *e){
                 // sleep(1);
                 else if(player=='W'){
                     printf("ai: %d,%d\n",cor.row,cor.col);
-                    cor=ai.deepSearch(map1,'B','W',0,y,x);//ai思考  //玩家在板子下的是x,y  在二维数组下的是y,x
+                    cor=ai.deepSearch(map1,'B','W',0,x,y);//ai思考
                     board.gomoku[cor.row][cor.col]='W';
                     map1[cor.row][cor.col]='W';
                     allPieces.push_back(make_pair(cor.row,cor.col));
@@ -1063,146 +1024,250 @@ void mode_one(lv_event_t *e){
         pthread_detach(touch);
     }
 }
-
 /*接收信号结束线程*/
 void sig_funtion(int){
     pthread_exit(0);
-
 }
-
-void mode_more(lv_event_t *e){
+TsDevice tsDevice;
+int ts_fd;
+struct input_event ts_event;
+int ts_x,ts_y;
+void mode_more_pthread(lv_event_t *e){
     lv_event_code_t code=lv_event_get_code(e);
     if(code==LV_EVENT_CLICKED){
-
+        // printf("1037\n");
+        // lv_obj_add_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
+        // lv_obj_clear_flag(contanier_play,LV_OBJ_FLAG_HIDDEN);
+        // printf("1040\n");
+        pthread_create(&mode_more_tid,NULL,mode_more,(void*)e);
+        pthread_join(mode_more_tid,NULL);//这样会导致页面无法切换
+    }
+}
+void* mode_more(void*arg){
+    lv_event_code_t code=lv_event_get_code((lv_event_t *)arg);
+    if(code==LV_EVENT_CLICKED){
         cout<<"play"<<endl;
         cout<<"切换成paly界面"<<endl;
-        /*给窗口login的容器添加隐藏属性，清除窗口play的隐藏属性*/
         lv_obj_add_flag(contanier_mode,LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(contanier_play,LV_OBJ_FLAG_HIDDEN);
-
-
         sleep(1);
-        /*send start 匹配开房*/
         info.Send_start_and_watch_Info(server_socket,1);
         cout<<"Send_start_and_watch_Info:send(server_socket,player_message,sizeof(player_message),0);"<<endl;
         color=info.Recv_ChessType(server_socket);
         cout<<"Recv_ChessType:  "<<color<<endl;
-
         /*创建一个线程实时获取坐标*/
-        pthread_create(&touch,NULL,[](void *arg)->void*{
-            signal(SIGUSR1,sig_funtion);
-            int x=-1,y=-1;
-            char player='W';
-            int end=0;
-            if(color=='B'){
-                player='B';//确认棋手身份
-                cout<<"先手"<<endl;
-                //先手
-                while(1){
-                    get_xy(x,y);
-                    printf("tsxy:%d,%d\n",x,y);
-                    x=(x-166)/34;
-                    y=(y-30)/34;
-                    if(board.isDropLegal(x,y,'B')){
-                        board.gomoku[x][y]='B';
-                        info.Send_position(server_socket,x,y,1);
-                        printf("我（黑）方落子%d,%d\n",x,y);
-                        dis_key(x,y,"black");
-                        break;
-                    }
-                }
-            }
-            cout<<"循环下棋"<<endl;
-            /*循环下棋*/
+        // pthread_create(&touch,NULL,[](void *arg)->void*{
+        signal(SIGUSR1,sig_funtion);
+        // tsDevice=TsDevice::TsInstance();
+        // ts_fd=tsDevice.ts_fd;
+        TsDevice tsDevice=TsDevice::TsInstance();
+        int ts_fd=tsDevice.ts_fd;
+        struct input_event ts_event;
+        int ts_x,ts_y;
+        int x=-1,y=-1;
+        char player='W';
+        int end=0;
+        if(color=='B'){
+            player='B';//确认棋手身份
+            cout<<"先手"<<endl;
             while(1){
-                /*接收对手下棋信息并绘制*/
-                // int *tmp=info.Recv_position(server_socket);//!看不懂，自己来↓
-                //way:down,local:(11,5),color:1
-                char recvbuf[128];
-                memset(recvbuf,0,128);
-                read(server_socket,recvbuf,128);
-                int colorflag;
-                sscanf(recvbuf,"way:down,local:(%d,%d),color:%d",&y,&x,&colorflag);
-                printf("解析接收到的数据：%d,%d  %d\n",x,y,colorflag);
-                if(colorflag==1){//1黑2白
-                    board.gomoku[x][y]='B';
-                    cout<<"对手落子："<<x<<","<<y<<" black"<<endl;
-                    if(board.checkWin(x,y,'B')){
-                        printf("对方赢了\n");
-                        end=1;
+                while(1){
+                    read(ts_fd,&ts_event,sizeof(ts_event));
+                    if(ts_event.type==EV_ABS&&ts_event.code==ABS_X){
+                        ts_x=ts_event.value*800/1024; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                     }
-                    dis_key(x,y,"black");
-                } else if(colorflag==2){
-                    board.gomoku[x][y]='W';
-                    cout<<"对手落子："<<x<<","<<y<<" white"<<endl;
-                    if(board.checkWin(y,x,'W')){
-                        printf("对方赢了\n");
-                        end=1;
+                    if(ts_event.type==EV_ABS&&ts_event.code==ABS_Y){
+                        ts_y=ts_event.value*480/600; //存储Y轴坐标，该句需要选择性修改，新版触摸屏必须转换	
                     }
-                    dis_key(x,y,"white");
-                }
-
-                /*我方落子*/
-                while(1){//发送落子
-                    get_xy(x,y);
-                    x=(x-166)/34;
-                    y=(y-30)/34;
-                    if(board.isDropLegal(x,y,color)){
-                        if(color=='B'){
-                            info.Send_position(server_socket,y,x,1);
-                            board.gomoku[y][x]='B';
-                            printf("我方落子：%d,%d black\n",x,y);
-                            if(board.checkWin(y,x,color)){
-                                printf("我赢了\n");
-                                end=1;
-                            }
-                            dis_key(x,y,"black");
-                        } else if(color=='W'){
-                            info.Send_position(server_socket,y,x,2);
-                            board.gomoku[y][x]='W';
-                            printf("我方落子：%d,%d white\n",x,y);
-                            if(board.checkWin(y,x,color)){
-                                printf("我赢了\n");
-                                end=1;
-                            }
-                            dis_key(x,y,"white");
-                        }
+                    if(ts_event.type==EV_KEY&&ts_event.code==BTN_TOUCH&&ts_event.value==0){
+                        printf("ts_x=%d,ts_y=%d\n",ts_x,ts_y);
                         break;
                     }
                 }
-
-                /*判断输赢，退出循环*/
-                if(end){
+                y=(ts_x-166)/34;
+                x=(ts_y-30)/34;
+                if(board.isDropLegal(x,y,'B')){
+                    board.gomoku[x][y]='B';
+                    board.gomoku_show();
+                    allPieces.push_back(make_pair(x,y));
+                    char sendbuf[128];
+                    memset(sendbuf,0,128);
+                    sprintf(sendbuf,"way:down,local:(%d,%d),color:%d",x,y,1);
+                    write(server_socket,sendbuf,strlen(sendbuf));
+                    printf("我（黑）方落子%d,%d\n",x,y);
+                    dis_key(x,y,"black");
                     break;
                 }
             }
-            },
-            NULL
-        );
-        pthread_detach(touch);
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        cout<<"-----------循环下棋------------"<<endl;
+        /*循环下棋*/
+        while(1){ /*接收对手下棋信息并绘制*/
+            char recvbuf[128];
+            while(1){//如果对方要求发送悔棋请求就一直接收悔棋请求，直到对方发送其它请求为止
+                memset(recvbuf,0,128);
+                printf("1101 准备接收到的对方数据\n");
+                read(server_socket,recvbuf,128);//!
+                printf("接收到的对方数据：%s\n",recvbuf);
+                if(strstr(recvbuf,"this is a retract request")){//如果收到数据是悔棋请求，单独创建一个线程处理
+                    while(1){//直到棋局结束才不需要悔棋，故需要一直等这类请求
+                        printf("对方请求悔棋，是否同意?(y/n)\n");
+                        char buf[128];
+                        memset(buf,0,128);
+                        scanf("%s",buf);
+                        if(strcmp(buf,"y")==0){
+                            write(server_socket,buf,strlen(buf));
+                            for(int i=0;i<2;i++){
+                                board.gomoku[allPieces.back().first][allPieces.back().second]='_';//玩家棋盘倒推
+                                lv_obj_add_flag(allPieceImages.back(),LV_OBJ_FLAG_HIDDEN);//隐藏图片
+                                free(allPieceImages.back());
+                                allPieceImages.pop_back();
+                                allPieces.pop_back();
+                            }
+                            board.gomoku_show();
+                            printf("同意对方悔棋请求\n");
+                            break;
+                        } else if(strcmp(buf,"n")==0){
+                            write(server_socket,buf,strlen(buf));
+                            printf("已发送不同意对方悔棋通知\n");
+                            break;
+                        } else{
+                            printf("输入有误，请重新输入(y/n)\n");
+                        }
+                    }
+                } else{//
+                    int colorflag;
+                    sscanf(recvbuf,"way:down,local:(%d,%d),color:%d",&x,&y,&colorflag);
+                    printf("解析接收到的数据：%d,%d  %d\n",x,y,colorflag);
+                    if(colorflag==1){//1黑2白
+                        board.gomoku[x][y]='B';
+                        board.gomoku_show();
+                        allPieces.push_back(make_pair(x,y));
+                        cout<<"对手落子："<<x<<","<<y<<" black"<<endl;
+                        if(board.checkWin(x,y,'B')){
+                            printf("对方赢了\n");
+                            end=1;
+                        }
+                        dis_key(x,y,"black");
+                    } else if(colorflag==2){
+                        board.gomoku[x][y]='W';
+                        board.gomoku_show();
+                        allPieces.push_back(make_pair(x,y));
+                        cout<<"对手落子："<<x<<","<<y<<" white"<<endl;
+                        if(board.checkWin(x,y,'W')){
+                            printf("对方赢了\n");
+                            end=1;
+                        }
+                        dis_key(x,y,"white");
+                    }
+                    break;
+                }
+            }
+            /*我方落子*/
+            while(1){//直到获取正确落子坐标才跳出，防乱按和悔棋需要
+                printf("1168 请落子：\n");
+                read(ts_fd,&ts_event,sizeof(ts_event));//!!!!接收触屏
+                printf("1170\n");
+                if(ts_event.type==EV_ABS&&ts_event.code==ABS_X){
+                    ts_x=ts_event.value*800/1024; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
+                }
+                if(ts_event.type==EV_ABS&&ts_event.code==ABS_Y){
+                    ts_y=ts_event.value*480/600; //存储Y轴坐标，该句需要选择性修改，新版触摸屏必须转换	
+                }
+                if(ts_event.type==EV_KEY&&ts_event.code==BTN_TOUCH&&ts_event.value==0){
+                    printf("ts_x=%d,ts_y=%d\n",ts_x,ts_y);
+                    if(360<=ts_x&&ts_x<798&&360<=ts_y&&ts_y<415){//悔棋体
+                        char request[128];
+                        memset(request,0,sizeof(request));
+                        strcpy(request,"this is a retract request");
+                        write(server_socket,request,strlen(request));
+                        printf("发送悔棋请求\n");
+                        char buf[128];
+                        memset(buf,0,sizeof(buf));
+                        read(server_socket,buf,128);//!等待接收请求应答
+                        if((strcmp(buf,"y")==0)){
+                            pthread_t tid;
+                            pthread_create(&tid,NULL,[](void *arg)->void*{
+                                cout<<"对方同意悔棋请求"<<endl;
+                                for(int i=0;i<2;i++){
+                                    board.gomoku[allPieces.back().first][allPieces.back().second]='_';//玩家棋盘倒推
+                                    lv_obj_add_flag(allPieceImages.back(),LV_OBJ_FLAG_HIDDEN);//隐藏图片
+                                    free(allPieceImages.back());
+                                    allPieceImages.pop_back();
+                                    allPieces.pop_back();
+                                }
+                                board.gomoku_show();
+                                },NULL);
+                        } else if(strcmp(buf,"n")==0){
+                            printf("对方不同意回去请求\n");
+                        }
+                        printf("请重新落子\n");
+                        // continue;//如果按到悔棋，继续读取坐标
+                    } else{//如果不是悔棋，默认按落子像素坐标处理
+                        x=(ts_x-166)/34;
+                        y=(ts_y-30)/34;
+                        if(board.isDropLegal(x,y,color)){//我方正确落子跳出
+                            printf("落子位置（%d,%d）有效\n",x,y);
+                            char sendbuf[128];
+                            memset(sendbuf,0,128);
+                            if(color=='B'){//如果我是黑子
+                                sprintf(sendbuf,"way:down,local:(%d,%d),color:%d",x,y,1);
+                                write(server_socket,sendbuf,strlen(sendbuf));
+                                board.gomoku[x][y]='B';
+                                board.gomoku_show();
+                                allPieces.push_back(make_pair(x,y));
+                                printf("我方落子：%d,%d black\n",x,y);
+                                if(board.checkWin(x,y,color)){
+                                    printf("我赢了\n");
+                                    end=1;
+                                }
+                                printf("1234\n");
+                                dis_key(x,y,"black");
+                                printf("1236\n");
+                            } else if(color=='W'){
+                                sprintf(sendbuf,"way:down,local:(%d,%d),color:%d",x,y,2);
+                                write(server_socket,sendbuf,strlen(sendbuf));
+                                board.gomoku[x][y]='W';
+                                board.gomoku_show();
+                                allPieces.push_back(make_pair(x,y));
+                                printf("我方落子：%d,%d white\n",x,y);
+                                if(board.checkWin(x,y,color)){
+                                    printf("我赢了\n");
+                                    end=1;
+                                }
+                                printf("1247\n");
+                                dis_key(x,y,"white");
+                                printf("1249\n");
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            if(end){/*判断输赢，退出循环*/
+                break;
+            }
+        }
+        //     },NULL);
+        // pthread_join(touch,NULL);
+        // pthread_detach(touch);
     }
 }
-
-void get_xy(int &x,int &y){
-    tsDevice=TsDevice::TsInstance();
-    int ts_fd=tsDevice.ts_fd;
-    struct input_event ts_event;
-    memset(&ts_event,0,sizeof(ts_event));
-    while(1){
-        read(ts_fd,&ts_event,sizeof(ts_event));
-        //分析获取到的输入设备的参数信息：类型、编码、数值
-        if(ts_event.type==EV_ABS&&ts_event.code==ABS_X){
-
-            x=ts_event.value*800/1024; //存储X轴坐标，该句需要选择性修改，新版触摸屏必须转换	
-        }
-        if(ts_event.type==EV_ABS&&ts_event.code==ABS_Y){
-
-            y=ts_event.value*480/600; //存储Y轴坐标，该句需要选择性修改，新版触摸屏必须转换	
-        }
-        //当用户的手指离开触摸屏，则把坐标返回
-        if(ts_event.type==EV_KEY&&ts_event.code==BTN_TOUCH&&ts_event.value==0){
-            printf("x=%d,y=%d\n",y,x);
-            break;
-        }
+/*Set in lv_conf.h as `LV_TICK_CUSTOM_SYS_TIME_EXPR`*/
+uint32_t custom_tick_get(void){
+    static uint64_t start_ms=0;
+    if(start_ms==0){
+        struct timeval tv_start;
+        gettimeofday(&tv_start,NULL);
+        start_ms=(tv_start.tv_sec*1000000+tv_start.tv_usec)/1000;
     }
+
+    struct timeval tv_now;
+    gettimeofday(&tv_now,NULL);
+    uint64_t now_ms;
+    now_ms=(tv_now.tv_sec*1000000+tv_now.tv_usec)/1000;
+
+    uint32_t time_ms=now_ms-start_ms;
+    return time_ms;
 }

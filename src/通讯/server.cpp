@@ -478,7 +478,7 @@ void* Play_And_Communicate(void *arg){
             // char player='b';
             if(/* player=='b' &&*/evt[i].data.fd==player_1.sockfd){//黑旗来消息
                 int rsize=recv(evt[i].data.fd,recvbuffer,BUFFERSIZE,0);
-                printf("recv black:  %s\n",recvbuffer);
+                printf("482 player_1 recv black:++++%s----%d\n",recvbuffer,rsize);
                 if(rsize<=0){
                     //客户端掉线
                     int eret=epoll_ctl(epfd_01,EPOLL_CTL_DEL,evt[i].data.fd,&evt[i]);
@@ -488,7 +488,7 @@ void* Play_And_Communicate(void *arg){
                     }
                     close(evt[i].data.fd);
                     for(auto it=rooms.begin(); it!=rooms.end(); ++it){
-                        std::cout<<"Room num = "<<it->num<<std::endl;
+                        std::cout<<"492 Room num = "<<it->num<<std::endl;
                         if(it->num==room_num){
                             //这里表示找到了房间
                             it->sign--;
@@ -524,17 +524,18 @@ void* Play_And_Communicate(void *arg){
                     break;
 
                 }
-                printf("recv:%s\n",recvbuffer);
+                printf("528 recv:%s----%d\n",recvbuffer,rsize);
+
                 write(player_2.sockfd,recvbuffer,strlen(recvbuffer));//!不能发给所有客户端，要排除自己和对手
-                {//这里处理的是给观战玩家的数据
+                if(28<=rsize){//这里处理的是给观战玩家的数据
                     int colorflag,x,y;
-                    sscanf(recvbuffer,"way:down,local:(%d,%d),color:%d",&y,&x,&colorflag);
-                    printf("解析接收到的数据：%d,%d  %d\n",y,x,colorflag);
+                    sscanf(recvbuffer,"way:down,local:(%d,%d),color:%d",&x,&y,&colorflag);
+                    printf("533 解析接收到的数据：%d,%d  %d\n",x,y,colorflag);
                     if(1==colorflag){
-                        gomoku[y][x]='B';
+                        gomoku[x][y]='B';
                     }
                     if(2==colorflag){
-                        gomoku[y][x]='W';
+                        gomoku[x][y]='W';
                     }
                     for(int i=0;i<N;i++){//在服务端这样处理后发给客户端
                         for(int j=0;j<N;j++){
@@ -547,6 +548,10 @@ void* Play_And_Communicate(void *arg){
                             write(fd[i],watchbuf,N*N);
                         }
                     }
+                }else if(25==rsize){
+                    printf("请求悔棋\n");
+                }else if(1==rsize){
+                    printf("应答悔棋\n");
                 }
                 // send_message_to_all_clients(fd,10,recvbuffer);
 
@@ -556,7 +561,7 @@ void* Play_And_Communicate(void *arg){
             } else if(/* player=='w'&& */evt[i].data.fd==player_2.sockfd){//白棋来消息
                 memset(recvbuffer,0,BUFFER_SIZE);
                 int rsize=recv(evt[i].data.fd,recvbuffer,BUFFERSIZE,0);
-                printf("recv white:  %s\n",recvbuffer);
+                printf("564 player_2 recv white:++++%s----%d\n",recvbuffer,rsize);
                 if(rsize<=0){
                     //客户端掉线
                     int eret=epoll_ctl(epfd_01,EPOLL_CTL_DEL,evt[i].data.fd,&evt[i]);
@@ -566,7 +571,7 @@ void* Play_And_Communicate(void *arg){
                     }
                     close(evt[i].data.fd);
                     for(auto it=rooms.begin(); it!=rooms.end(); ++it){
-                        std::cout<<"Room num = "<<it->num<<std::endl;
+                        std::cout<<"570 Room num = "<<it->num<<std::endl;
                         if(it->num==room_num){
                             //这里表示找到了房间
                             it->sign--;
@@ -603,15 +608,15 @@ void* Play_And_Communicate(void *arg){
                 //数据处理
                 write(player_1.sockfd,recvbuffer,strlen(recvbuffer));
                 // send_message_to_all_clients(fd,10,recvbuffer);//!不能发给所有客户端，要排除自己和对手
-                {//这里处理的是给观战玩家的数据
+                if(28<=rsize){//这里处理的是给观战玩家的数据
                     int colorflag,x,y;
-                    sscanf(recvbuffer,"way:down,local:(%d,%d),color:%d",&y,&x,&colorflag);
-                    printf("解析接收到的数据：%d,%d  %d\n",y,x,colorflag);
+                    sscanf(recvbuffer,"way:down,local:(%d,%d),color:%d",&x,&y,&colorflag);
+                    printf("614 解析接收到的数据：%d,%d  %d\n",x,y,colorflag);
                     if(1==colorflag){
-                        gomoku[y][x]='B';
+                        gomoku[x][y]='B';
                     }
                     if(2==colorflag){
-                        gomoku[y][x]='W';
+                        gomoku[x][y]='W';
                     }
                     for(int i=0;i<N;i++){//在服务端这样处理后发给客户端
                         for(int j=0;j<N;j++){
@@ -624,6 +629,10 @@ void* Play_And_Communicate(void *arg){
                             write(fd[i],watchbuf,N*N);
                         }
                     }
+                }else if(25==rsize){
+                    printf("请求悔棋\n");
+                }else if(1==rsize){
+                    printf("应答悔棋\n");
                 }
                 // player='b';
             }
