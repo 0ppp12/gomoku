@@ -1045,7 +1045,6 @@ void mode_one(lv_event_t *e){
                             printf("黑子赢了\n");
                             lv_obj_clear_flag(contanier_result,LV_OBJ_FLAG_HIDDEN);
                             lv_label_set_text(result_label,"black win");
-                            sleep(3);
                             memset(board.gomoku,'_',sizeof(board.gomoku));
                             memset(map1,0,sizeof(map1));
                             lv_obj_t *img_play=lv_img_create(contanier_play);
@@ -1067,7 +1066,6 @@ void mode_one(lv_event_t *e){
                         printf("白子赢了\n");
                         lv_obj_clear_flag(contanier_result,LV_OBJ_FLAG_HIDDEN);
                         lv_label_set_text(result_label,"white win");
-                        sleep(3);
                         memset(board.gomoku,'_',sizeof(board.gomoku));
                         memset(map1,0,sizeof(map1));
                         lv_obj_t *img_play=lv_img_create(contanier_play);
