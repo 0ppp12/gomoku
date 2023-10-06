@@ -36,6 +36,14 @@ void Checkerboard::gomoku_show(){
 				cout<<gomoku[row][col]<<"  ";
 		cout<<endl;
 	}
+
+	// for(int col=0; col<N; col++){
+	// 	if(col<10)cout<<" ";
+	// 	cout<<col<<"  ";
+	// 	for(int row=0; row<N; row++)
+	// 			cout<<gomoku[row][col]<<"  ";
+	// 	cout<<endl;
+	// }
 }
 Checkerboard::Checkerboard(){
 	//初始化棋盘为'_'
@@ -53,7 +61,7 @@ int Checkerboard::isDropLegal(int x,int y,char color ){
 		printf("%d,%d已被%c占\n",x,y,gomoku[x][y]);
 		return 0;
 	}
-	gomoku[x][y] = color;
+	// gomoku[x][y] = color;//判断就老老实实判断，不要越界
 	return 1;
 }
 
