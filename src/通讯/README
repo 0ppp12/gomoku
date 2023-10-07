@@ -1,0 +1,1 @@
+g++ server.cpp thread_pool.cpp -pthread&&./a.out 9999
